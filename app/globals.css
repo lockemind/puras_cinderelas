@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Custom gold/night color tokens for Tailwind v4 */
+@theme inline {
+  --color-gold: oklch(0.82 0.15 85);
+  --color-gold-light: oklch(0.87 0.13 85);
+  --color-gold-dark: oklch(0.65 0.14 85);
+  --color-gold-muted: oklch(0.82 0.15 85 / 0.12);
+  --color-night: oklch(0.10 0.015 265);
+  --color-night-card: oklch(0.13 0.015 265);
+  --color-night-border: oklch(0.18 0.015 265);
+
+  /* Map to CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/* Dark & Premium theme — default (dark mode always on) */
+:root {
+  --background: oklch(0.10 0.015 265);
+  --foreground: oklch(0.95 0.005 265);
+  --card: oklch(0.13 0.015 265);
+  --card-foreground: oklch(0.95 0.005 265);
+  --popover: oklch(0.13 0.015 265);
+  --popover-foreground: oklch(0.95 0.005 265);
+  --primary: oklch(0.82 0.15 85);
+  --primary-foreground: oklch(0.10 0.015 265);
+  --secondary: oklch(0.18 0.015 265);
+  --secondary-foreground: oklch(0.95 0.005 265);
+  --muted: oklch(0.18 0.015 265);
+  --muted-foreground: oklch(0.55 0.01 265);
+  --accent: oklch(0.18 0.015 265);
+  --accent-foreground: oklch(0.82 0.15 85);
+  --destructive: oklch(0.62 0.22 25);
+  --border: oklch(0.18 0.015 265);
+  --input: oklch(0.18 0.015 265);
+  --ring: oklch(0.82 0.15 85);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100dvh;
+  }
+  html {
+    @apply font-sans;
+  }
+}
