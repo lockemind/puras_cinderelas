@@ -3,36 +3,34 @@ export const dynamic = 'force-dynamic'
 import { getCompetition } from '@/actions/competition'
 import { getAllPlayers } from '@/actions/players'
 import { getAllTeamsWithProgress } from '@/actions/results'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getPot1Assignments } from '@/actions/draft'
 import { CompetitionControls } from '@/components/admin/competition-controls'
 import { PlayersManager } from '@/components/admin/players-manager'
-import { DrawButton } from '@/components/admin/draw-button'
+import { Pot1Assignment } from '@/components/admin/pot1-assignment'
 import { ResultsEditor } from '@/components/admin/results-editor'
 
-async function getDrawDone() {
-  const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('player_teams')
-    .select('id')
-    .eq('pot', 1)
-    .limit(1)
-  return (data?.length ?? 0) > 0
-}
-
 export default async function AdminPage() {
-  const [competition, players, teams, drawDone] = await Promise.all([
+  const [competition, players, teams, pot1Assignments] = await Promise.all([
     getCompetition(),
     getAllPlayers(),
     getAllTeamsWithProgress(),
-    getDrawDone(),
+    getPot1Assignments(),
   ])
+
+  const pot1Teams = (teams ?? [])
+    .filter(t => t.pot === 1)
+    .map(t => ({ id: t.id, name: t.name, flag_emoji: t.flag_emoji }))
 
   return (
     <div className="space-y-6">
       <CompetitionControls competition={competition} />
       <PlayersManager players={players} />
       {competition.status === 'draft' && (
-        <DrawButton drawDone={drawDone} />
+        <Pot1Assignment
+          players={players}
+          pot1Teams={pot1Teams}
+          assignments={pot1Assignments}
+        />
       )}
       {(['locked', 'running', 'finished'] as const).includes(
         competition.status as 'locked' | 'running' | 'finished'

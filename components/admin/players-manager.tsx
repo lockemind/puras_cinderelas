@@ -32,7 +32,7 @@ export function PlayersManager({ players }: { players: Player[] }) {
     <Card className="bg-night-card border-night-border">
       <CardHeader>
         <CardTitle className="text-gold text-sm uppercase tracking-widest">
-          Jogadores ({players.length}/12)
+          Jogadores ({players.length}/13)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -46,7 +46,7 @@ export function PlayersManager({ players }: { players: Player[] }) {
           />
           <Button
             onClick={handleCreate}
-            disabled={loading || players.length >= 12}
+            disabled={loading || players.length >= 13}
             className="bg-gold text-night hover:bg-gold-light font-semibold shrink-0"
           >
             {loading ? '...' : 'Adicionar'}
