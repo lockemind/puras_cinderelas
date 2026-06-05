@@ -11,7 +11,7 @@ const STATUS_MESSAGES: Record<string, string> = {
   finished: 'Competição terminada',
 }
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function PublicPage() {
   const [competition, rankings] = await Promise.all([

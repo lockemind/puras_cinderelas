@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCompetition } from '@/actions/competition'
 import { getAllPlayers } from '@/actions/players'
 import { getAllTeamsWithProgress } from '@/actions/results'
