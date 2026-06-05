@@ -212,10 +212,17 @@ Navegação por tab bar no fundo (mobile-first). Três tabs:
 
 **Tab 1 — A minha equipa**
 - Estado `draft`: mostra Pote 1 (atribuído por sorteio) + seletores para Potes 2, 3 e 4
-- Estado `running`/`locked`/`finished`: mostra as 4 seleções com pontos individuais e fase alcançada
+- Estado `running`/`locked`/`finished`: mostra as 4 seleções, cada uma num card expansível com:
+  - Fase alcançada e pontuação total da equipa
+  - Breakdown detalhado da origem dos pontos:
+    - Fase de grupos: `X vitórias × 3 + Y empates = Z pts`
+    - Knockout: `+5 (1/16) + +8 (1/8) + ...` conforme fase alcançada
+    - Bónus Cinderela: `+3 (QF) + +7 (SF) + ...` (apenas Potes 3 e 4)
+  - O breakdown é calculado on-the-fly a partir de `team_progress` — sem dados extra na BD
 
 **Tab 2 — Classificação**
 - Tabela global com posição, nome e pontuação de todos os jogadores
+- Clicar numa linha expande o detalhe: 4 equipas desse jogador com pontuação de cada uma
 - Indicador "Próxima atualização em X min"
 
 **Tab 3 — Seleções**
