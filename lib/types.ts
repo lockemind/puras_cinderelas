@@ -70,3 +70,16 @@ export type PlayerWithScore = {
   teams: PlayerTeamWithProgress[]
   totalScore: number
 }
+
+export type Fixture = {
+  id: string
+  api_id: number
+  stage: string
+  group: string | null
+  utc_date: string          // ISO string from Supabase
+  status: string            // SCHEDULED | LIVE | IN_PLAY | PAUSED | FINISHED | POSTPONED | CANCELLED
+  home_team: { id: string; name: string; flag_emoji: string } | null
+  away_team: { id: string; name: string; flag_emoji: string } | null
+  home_score: number | null
+  away_score: number | null
+}
