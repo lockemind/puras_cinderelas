@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { getCompetition } from '@/actions/competition'
 import { getRankings } from '@/actions/results'
 import { RankingTable } from '@/components/ranking-table'
@@ -24,6 +25,14 @@ export default async function PublicPage() {
   return (
     <div className="min-h-dvh bg-night px-4 py-8 max-w-lg mx-auto">
       <header className="mb-8 text-center">
+        <Image
+          src="/logo.jpg"
+          alt="Puras Cinderelas"
+          width={120}
+          height={120}
+          className="mx-auto mb-4 rounded-full"
+          priority
+        />
         <p className="text-gold text-xs uppercase tracking-widest mb-1">
           Mundial FIFA 2026
         </p>
