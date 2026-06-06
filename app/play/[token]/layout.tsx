@@ -36,7 +36,7 @@ export default async function PlayerLayout({
       <nav className="fixed bottom-0 left-0 right-0 bg-night-card border-t border-night-border flex">
         <TabLink href={`${base}/team`} label="Equipa" icon="⚽" />
         <TabLink href={`${base}/ranking`} label="Classificação" icon="🏆" />
-        <TabLink href={`${base}/selections`} label="Seleções" icon="🌍" />
+        <TabLink href={`${base}/selections`} label="Jogos" icon="📅" />
       </nav>
     </div>
   )
