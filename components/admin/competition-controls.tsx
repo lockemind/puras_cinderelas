@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { advanceStatus } from '@/actions/competition'
+import { triggerFixturesSync } from '@/actions/fixtures'
 import type { Competition } from '@/lib/types'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -28,6 +29,7 @@ export function CompetitionControls({
   competition: Competition
 }) {
   const [loading, setLoading] = useState(false)
+  const [fixturesLoading, setFixturesLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleAdvance() {
@@ -39,6 +41,18 @@ export function CompetitionControls({
       setError(e instanceof Error ? e.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleSyncFixtures() {
+    setFixturesLoading(true)
+    setError(null)
+    try {
+      await triggerFixturesSync()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setFixturesLoading(false)
     }
   }
 
@@ -67,6 +81,14 @@ export function CompetitionControls({
             {loading ? 'A processar...' : advanceLabel}
           </Button>
         )}
+        <Button
+          onClick={handleSyncFixtures}
+          disabled={fixturesLoading}
+          variant="outline"
+          className="border-night-border text-foreground"
+        >
+          {fixturesLoading ? 'A sincronizar...' : 'Sync Fixtures'}
+        </Button>
         {error && (
           <p className="text-destructive text-sm">{error}</p>
         )}
