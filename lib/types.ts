@@ -78,8 +78,8 @@ export type Fixture = {
   group: string | null
   utc_date: string          // ISO string from Supabase
   status: string            // SCHEDULED | LIVE | IN_PLAY | PAUSED | FINISHED | POSTPONED | CANCELLED
-  home_team: { id: string; name: string; flag_emoji: string } | null
-  away_team: { id: string; name: string; flag_emoji: string } | null
+  home_team: { id: string; name: string; flag_emoji: string; mascot: string | null } | null
+  away_team: { id: string; name: string; flag_emoji: string; mascot: string | null } | null
   home_score: number | null
   away_score: number | null
 }

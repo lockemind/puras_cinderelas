@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { getPlayerByToken } from '@/actions/players'
 import { getPlayerTeams } from '@/actions/draft'
 import { getFixtures } from '@/actions/fixtures'
@@ -65,9 +66,10 @@ export default async function JogosPage({
               const isLive = ['IN_PLAY', 'PAUSED', 'LIVE'].includes(fixture.status)
 
               return (
-                <div
+                <Link
                   key={fixture.id}
-                  className={`flex items-center gap-2 px-3 py-2 rounded border text-sm ${
+                  href={`/play/${token}/selections/${fixture.id}`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded border text-sm active:opacity-70 transition-opacity ${
                     isMyGame
                       ? 'border-gold/40 bg-gold-muted'
                       : 'border-night-border bg-night-card'
@@ -92,7 +94,7 @@ export default async function JogosPage({
                   <span className="text-base w-6 text-center">
                     {fixture.away_team?.flag_emoji ?? '?'}
                   </span>
-                </div>
+                </Link>
               )
             })}
           </div>
