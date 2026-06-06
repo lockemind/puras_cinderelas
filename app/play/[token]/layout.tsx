@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getPlayerByToken } from '@/actions/players'
+import { MascotReveal } from '@/components/mascot-reveal'
 
 export default async function PlayerLayout({
   children,
@@ -40,7 +41,7 @@ export default async function PlayerLayout({
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-24">
-        {children}
+        <MascotReveal>{children}</MascotReveal>
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-night-card border-t border-night-border flex">
