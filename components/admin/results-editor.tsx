@@ -29,12 +29,12 @@ type TeamRow = {
   name: string
   pot: number
   flag_emoji: string
-  team_progress: Array<{
+  team_progress: {
     group_wins: number
     group_draws: number
     stage_reached: string
     is_champion: boolean
-  }>
+  } | null
 }
 
 export function ResultsEditor({
@@ -124,7 +124,7 @@ export function ResultsEditor({
             {teams
               .filter(t => t.pot === pot)
               .map(team => {
-                const progress = team.team_progress[0] ?? {
+                const progress = team.team_progress ?? {
                   group_wins: 0,
                   group_draws: 0,
                   stage_reached: 'group_stage',

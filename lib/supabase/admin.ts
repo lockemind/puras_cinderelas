@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from './types'
 
 // Use service role key — NEVER import this in client components
 export function createAdminClient() {
@@ -11,7 +12,7 @@ export function createAdminClient() {
     )
   }
 
-  return createClient(url, key, {
+  return createClient<Database>(url, key, {
     auth: { persistSession: false },
   })
 }

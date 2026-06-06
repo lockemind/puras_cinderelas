@@ -104,7 +104,7 @@ export async function getRankings() {
     const teamsWithScores = myTeams.map(pt => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const team = pt.teams as any
-      const progress = team?.team_progress?.[0] ?? {
+      const progress = team?.team_progress ?? {
         group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false,
       }
       const breakdown = getScoreBreakdown(progress, pt.pot)

@@ -36,7 +36,7 @@ export default async function AdminPage() {
         competition.status as 'locked' | 'running' | 'finished'
       ) && (
         <ResultsEditor
-          teams={teams as Parameters<typeof ResultsEditor>[0]['teams']}
+          teams={teams}
           lastSyncedAt={competition.last_synced_at}
         />
       )}

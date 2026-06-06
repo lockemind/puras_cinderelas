@@ -18,7 +18,7 @@ export async function getFixtures(): Promise<Fixture[]> {
 
   if (error) throw error
 
-  return (data ?? []) as unknown as Fixture[]
+  return data ?? []
 }
 
 export async function triggerFixturesSync() {

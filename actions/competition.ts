@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { CompetitionStatus } from '@/lib/types'
+import type { Competition, CompetitionStatus } from '@/lib/types'
 
 const STATUS_FLOW: Record<CompetitionStatus, CompetitionStatus | null> = {
   setup: 'draft',
@@ -36,7 +36,7 @@ export async function advanceStatus() {
   revalidatePath('/', 'layout')
 }
 
-export async function getCompetition() {
+export async function getCompetition(): Promise<Competition> {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('competition')
@@ -45,5 +45,5 @@ export async function getCompetition() {
     .single()
 
   if (error) throw error
-  return data
+  return data as Competition
 }
