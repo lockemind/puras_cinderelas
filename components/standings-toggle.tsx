@@ -9,9 +9,10 @@ type Props = {
   rankings: Awaited<ReturnType<typeof getRankings>>
   teams: Awaited<ReturnType<typeof getAllTeamsWithProgress>>
   expandedPlayerId: string
+  isLocked: boolean
 }
 
-export function StandingsToggle({ rankings, teams, expandedPlayerId }: Props) {
+export function StandingsToggle({ rankings, teams, expandedPlayerId, isLocked }: Props) {
   const [view, setView] = useState<'players' | 'teams'>('players')
 
   return (
@@ -40,7 +41,7 @@ export function StandingsToggle({ rankings, teams, expandedPlayerId }: Props) {
       </div>
 
       {view === 'players' ? (
-        <RankingTable rankings={rankings} expandedId={expandedPlayerId} />
+        <RankingTable rankings={rankings} expandedId={expandedPlayerId} isLocked={isLocked} />
       ) : (
         <TeamStandings teams={teams} />
       )}

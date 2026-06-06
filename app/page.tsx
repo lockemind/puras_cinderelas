@@ -21,6 +21,7 @@ export default async function PublicPage() {
   ])
 
   const isRunningOrAfter = ['running', 'finished'].includes(competition.status)
+  const isLocked = ['locked', 'running', 'finished'].includes(competition.status)
 
   return (
     <div className="min-h-dvh bg-night px-4 py-8 max-w-lg mx-auto">
@@ -54,7 +55,7 @@ export default async function PublicPage() {
           Ainda não há classificação disponível.
         </p>
       ) : (
-        <RankingTable rankings={rankings} />
+        <RankingTable rankings={rankings} isLocked={isLocked} />
       )}
     </div>
   )

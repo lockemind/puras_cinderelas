@@ -20,6 +20,8 @@ export default async function RankingPage({
     getCompetition(),
   ])
 
+  const isLocked = ['locked', 'running', 'finished'].includes(competition.status)
+
   return (
     <div className="py-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -35,6 +37,7 @@ export default async function RankingPage({
           rankings={rankings}
           teams={teams}
           expandedPlayerId={player.id}
+          isLocked={isLocked}
         />
       )}
     </div>
