@@ -18,6 +18,8 @@ const STATUS_DISPLAY: Record<string, string> = {
   IN_PLAY: 'AO VIVO',
   PAUSED: 'INT',
   LIVE: 'AO VIVO',
+  POSTPONED: 'ADI',
+  CANCELLED: 'CANC',
 }
 
 export default async function JogosPage({
@@ -79,10 +81,10 @@ export default async function JogosPage({
                   </span>
                   <span className="tabular-nums text-xs font-mono text-center w-14">
                     {isFinished
-                      ? `${fixture.home_score} – ${fixture.away_score}`
+                      ? `${fixture.home_score ?? '?'} – ${fixture.away_score ?? '?'}`
                       : isLive
                       ? STATUS_DISPLAY[fixture.status]
-                      : toDisplayTime(fixture.utc_date)}
+                      : STATUS_DISPLAY[fixture.status] ?? toDisplayTime(fixture.utc_date)}
                   </span>
                   <span className="text-foreground flex-1 truncate text-right">
                     {fixture.away_team?.name ?? '—'}
