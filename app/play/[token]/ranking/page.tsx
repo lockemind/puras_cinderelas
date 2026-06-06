@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 import { getPlayerByToken } from '@/actions/players'
-import { getRankings } from '@/actions/results'
+import { getRankings, getAllTeamsWithProgress } from '@/actions/results'
 import { getCompetition } from '@/actions/competition'
-import { RankingTable } from '@/components/ranking-table'
 import { SyncIndicator } from '@/components/sync-indicator'
+import { StandingsToggle } from '@/components/standings-toggle'
 
 export default async function RankingPage({
   params,
@@ -14,8 +14,9 @@ export default async function RankingPage({
   const player = await getPlayerByToken(token)
   if (!player) notFound()
 
-  const [rankings, competition] = await Promise.all([
+  const [rankings, teams, competition] = await Promise.all([
     getRankings(),
+    getAllTeamsWithProgress(),
     getCompetition(),
   ])
 
@@ -30,7 +31,11 @@ export default async function RankingPage({
           Classificação disponível assim que o torneio começar.
         </p>
       ) : (
-        <RankingTable rankings={rankings} expandedId={player.id} />
+        <StandingsToggle
+          rankings={rankings}
+          teams={teams}
+          expandedPlayerId={player.id}
+        />
       )}
     </div>
   )
