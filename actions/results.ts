@@ -91,7 +91,7 @@ export async function getRankings() {
     .select(`
       player_id, pot,
       teams (
-        id, name, pot, flag_emoji,
+        id, name, pot, flag_emoji, mascot,
         team_progress ( group_wins, group_draws, stage_reached, is_champion )
       )
     `)
@@ -109,7 +109,7 @@ export async function getRankings() {
       }
       const breakdown = getScoreBreakdown(progress, pt.pot)
       return {
-        team: { id: team.id, name: team.name, pot: team.pot, flag_emoji: team.flag_emoji },
+        team: { id: team.id, name: team.name, pot: team.pot, flag_emoji: team.flag_emoji, mascot: (team.mascot ?? null) as string | null },
         pot: pt.pot,
         progress,
         breakdown,

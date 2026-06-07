@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { getRankings } from '@/actions/results'
 
 type Rankings = Awaited<ReturnType<typeof getRankings>>
@@ -36,6 +37,57 @@ export function RankingTable({
   )
 }
 
+function MascotIcons({ teams }: { teams: Rankings[number]['teams'] }) {
+  return (
+    <span className="flex items-center gap-0.5 flex-shrink-0">
+      {teams.map(t =>
+        t.team.mascot ? (
+          <Image
+            key={t.pot}
+            src={`/mascots/icons/${t.team.mascot}.webp`}
+            alt={t.team.name}
+            width={20}
+            height={20}
+            className="rounded-sm"
+          />
+        ) : null
+      )}
+    </span>
+  )
+}
+
+function RowHeader({
+  position,
+  entry,
+  isCurrentPlayer,
+  isLocked,
+}: {
+  position: number
+  entry: Rankings[number]
+  isCurrentPlayer: boolean
+  isLocked: boolean
+}) {
+  const showAllIcons = isLocked || isCurrentPlayer
+  const sortedTeams = [...entry.teams].sort((a, b) => a.pot - b.pot)
+  const pot1Team = sortedTeams.find(t => t.pot === 1)
+  const iconsToShow = showAllIcons ? sortedTeams : pot1Team ? [pot1Team] : []
+
+  return (
+    <>
+      <span className="text-muted-foreground text-sm w-5 text-center font-mono">
+        {position}
+      </span>
+      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+        <span className="text-foreground font-medium truncate">{entry.player.name}</span>
+        {iconsToShow.length > 0 && <MascotIcons teams={iconsToShow} />}
+      </div>
+      <span className="text-gold font-bold tabular-nums">
+        {entry.totalScore} pts
+      </span>
+    </>
+  )
+}
+
 function RankingRow({
   position,
   entry,
@@ -48,18 +100,6 @@ function RankingRow({
   isLocked: boolean
 }) {
   const canExpand = isLocked || isCurrentPlayer
-
-  const summary = (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <span className="text-muted-foreground text-sm w-5 text-center font-mono">
-        {position}
-      </span>
-      <span className="text-foreground font-medium flex-1">{entry.player.name}</span>
-      <span className="text-gold font-bold tabular-nums">
-        {entry.totalScore} pts
-      </span>
-    </div>
-  )
 
   const teamsDetail = (
     <div className="px-4 pb-3 border-t border-night-border space-y-1">
@@ -86,7 +126,14 @@ function RankingRow({
   if (!canExpand) {
     return (
       <div className="rounded border border-night-border bg-night-card overflow-hidden">
-        {summary}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <RowHeader
+            position={position}
+            entry={entry}
+            isCurrentPlayer={isCurrentPlayer}
+            isLocked={isLocked}
+          />
+        </div>
       </div>
     )
   }
@@ -97,13 +144,12 @@ function RankingRow({
       className="rounded border border-night-border bg-night-card overflow-hidden"
     >
       <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer list-none select-none">
-        <span className="text-muted-foreground text-sm w-5 text-center font-mono">
-          {position}
-        </span>
-        <span className="text-foreground font-medium flex-1">{entry.player.name}</span>
-        <span className="text-gold font-bold tabular-nums">
-          {entry.totalScore} pts
-        </span>
+        <RowHeader
+          position={position}
+          entry={entry}
+          isCurrentPlayer={isCurrentPlayer}
+          isLocked={isLocked}
+        />
       </summary>
       {teamsDetail}
     </details>
