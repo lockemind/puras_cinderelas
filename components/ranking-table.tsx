@@ -141,7 +141,7 @@ function RankingRow({
   return (
     <details
       open={isCurrentPlayer}
-      className="rounded border border-night-border bg-night-card overflow-hidden"
+      className="group rounded border border-night-border bg-night-card overflow-hidden"
     >
       <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer list-none select-none">
         <RowHeader
@@ -150,6 +150,17 @@ function RankingRow({
           isCurrentPlayer={isCurrentPlayer}
           isLocked={isLocked}
         />
+        <svg
+          className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 transition-transform duration-200 group-open:rotate-180"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </summary>
       {teamsDetail}
     </details>
