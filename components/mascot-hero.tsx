@@ -36,7 +36,6 @@ export function MascotHero({
           alt={mascots[0].name}
           width={160}
           height={160}
-          style={{ transform: 'scaleX(-1)' }}
         />
         <p className="text-xs text-muted-foreground mt-2">{mascots[0].name}</p>
       </div>
