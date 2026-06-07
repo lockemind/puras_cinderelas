@@ -4,12 +4,12 @@ import type { getRankings } from '@/actions/results'
 type Rankings = Awaited<ReturnType<typeof getRankings>>
 
 const STAGE_SHORT: Record<string, string> = {
-  group_stage: 'GR',
+  group_stage: 'Grupos',
   r32: '1/16',
   r16: '1/8',
-  qf: 'QF',
-  sf: 'SF',
-  final: 'F',
+  qf: 'Quartos',
+  sf: 'Meias',
+  final: 'Final',
   champion: '🏆',
 }
 
