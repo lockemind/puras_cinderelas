@@ -23,8 +23,8 @@ const POINTS_FOR_WINNING_INTO: Partial<Record<StageReached, number>> = {
 }
 
 const CINDERELA_BONUS: Record<3 | 4, Partial<Record<StageReached, number>>> = {
-  3: { qf: 3, sf: 7, final: 10, champion: 15 },
-  4: { qf: 5, sf: 10, final: 15, champion: 20 },
+  3: { r32: 3, r16: 7, qf: 10, sf: 15, final: 20, champion: 25 },
+  4: { r32: 5, r16: 10, qf: 15, sf: 20, final: 25, champion: 30 },
 }
 
 export type KnockoutRoundDetail = { label: string; points: number }
@@ -68,6 +68,8 @@ export function getScoreBreakdown(progress: TeamProgress, pot: number): ScoreBre
   if (pot === 3 || pot === 4) {
     const table = CINDERELA_BONUS[pot as 3 | 4]
     const bonusMilestones: Array<{ stage: StageReached; label: string }> = [
+      { stage: 'r32', label: 'Dezasseis-avos de final' },
+      { stage: 'r16', label: 'Oitavos de final' },
       { stage: 'qf', label: 'Quartos de final' },
       { stage: 'sf', label: 'Meia-final' },
       { stage: 'final', label: 'Final' },

@@ -72,36 +72,71 @@ describe('cinderela bonus — pot 3', () => {
     expect(b.cinderelaBonusTotal).toBe(0)
   })
 
-  it('+3 for reaching qf', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'qf' }), 3)
+  it('+3 for reaching r32', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'r32' }), 3)
     expect(b.cinderelaBonusTotal).toBe(3)
   })
 
-  it('+10 cumulative for reaching sf (3+7)', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'sf' }), 3)
+  it('+10 cumulative for reaching r16 (3+7)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'r16' }), 3)
     expect(b.cinderelaBonusTotal).toBe(10)
   })
 
-  it('+20 cumulative for reaching final (3+7+10)', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'final' }), 3)
+  it('+20 cumulative for reaching qf (3+7+10)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'qf' }), 3)
     expect(b.cinderelaBonusTotal).toBe(20)
   })
 
-  it('+35 cumulative for champion (3+7+10+15)', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'champion', is_champion: true }), 3)
+  it('+35 cumulative for reaching sf (3+7+10+15)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'sf' }), 3)
     expect(b.cinderelaBonusTotal).toBe(35)
+  })
+
+  it('+55 cumulative for reaching final (3+7+10+15+20)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'final' }), 3)
+    expect(b.cinderelaBonusTotal).toBe(55)
+  })
+
+  it('+80 cumulative for champion (3+7+10+15+20+25)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'champion', is_champion: true }), 3)
+    expect(b.cinderelaBonusTotal).toBe(80)
   })
 })
 
 describe('cinderela bonus — pot 4', () => {
-  it('+5 for reaching qf', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'qf' }), 4)
+  it('no bonus for group_stage', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'group_stage' }), 4)
+    expect(b.cinderelaBonusTotal).toBe(0)
+  })
+
+  it('+5 for reaching r32', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'r32' }), 4)
     expect(b.cinderelaBonusTotal).toBe(5)
   })
 
-  it('+50 cumulative for champion (5+10+15+20)', () => {
-    const b = getScoreBreakdown(mkProgress({ stage_reached: 'champion', is_champion: true }), 4)
+  it('+15 cumulative for reaching r16 (5+10)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'r16' }), 4)
+    expect(b.cinderelaBonusTotal).toBe(15)
+  })
+
+  it('+30 cumulative for reaching qf (5+10+15)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'qf' }), 4)
+    expect(b.cinderelaBonusTotal).toBe(30)
+  })
+
+  it('+50 cumulative for reaching sf (5+10+15+20)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'sf' }), 4)
     expect(b.cinderelaBonusTotal).toBe(50)
+  })
+
+  it('+75 cumulative for reaching final (5+10+15+20+25)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'final' }), 4)
+    expect(b.cinderelaBonusTotal).toBe(75)
+  })
+
+  it('+105 cumulative for champion (5+10+15+20+25+30)', () => {
+    const b = getScoreBreakdown(mkProgress({ stage_reached: 'champion', is_champion: true }), 4)
+    expect(b.cinderelaBonusTotal).toBe(105)
   })
 })
 
@@ -121,9 +156,9 @@ describe('full score calculation', () => {
   it('calculates total correctly for a pot 3 team at sf', () => {
     // 2 wins + 1 draw in groups = 7
     // sf knockout = 25
-    // cinderela sf = +10
-    // total = 42
+    // cinderela sf = 3+7+10+15 = 35
+    // total = 67
     const p = mkProgress({ group_wins: 2, group_draws: 1, stage_reached: 'sf' })
-    expect(calculateTeamScore(p, 3)).toBe(42)
+    expect(calculateTeamScore(p, 3)).toBe(67)
   })
 })
