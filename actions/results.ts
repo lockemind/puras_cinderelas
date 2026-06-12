@@ -140,3 +140,40 @@ export async function getRankings() {
 
   return ranked
 }
+
+export type RankingEntryWithDelta = Awaited<ReturnType<typeof getRankings>>[number] & {
+  rank: number
+  rankDelta: number | null
+  pointsToday: number | null
+}
+
+export async function getRankingsWithDeltas(): Promise<RankingEntryWithDelta[]> {
+  const supabase = createAdminClient()
+  const rankings = await getRankings()
+
+  const { data: latestRow } = await supabase
+    .from('ranking_snapshots')
+    .select('snapshot_date')
+    .order('snapshot_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  let snapByPlayer = new Map<string, { rank: number; points: number }>()
+  if (latestRow) {
+    const { data: snaps } = await supabase
+      .from('ranking_snapshots')
+      .select('player_id, rank, points')
+      .eq('snapshot_date', latestRow.snapshot_date)
+    snapByPlayer = new Map((snaps ?? []).map(s => [s.player_id, s]))
+  }
+
+  return rankings.map((entry, idx) => {
+    const snap = snapByPlayer.get(entry.player.id)
+    return {
+      ...entry,
+      rank: idx + 1,
+      rankDelta: snap ? snap.rank - (idx + 1) : null,
+      pointsToday: snap ? entry.totalScore - snap.points : null,
+    }
+  })
+}

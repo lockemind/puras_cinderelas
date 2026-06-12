@@ -149,6 +149,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ranking_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          points: number
+          rank: number
+          snapshot_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          points: number
+          rank: number
+          snapshot_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          points?: number
+          rank?: number
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_snapshots_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       score_entries: {
         Row: {
           created_at: string
