@@ -19,11 +19,15 @@ function pick() {
 export function MascotReveal({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const prevPath = useRef(pathname)
-  const [mascot, setMascot] = useState(pick)
+  // Picked only after mount: a random pick during render would make the
+  // server HTML disagree with the client and break hydration.
+  const [mascot, setMascot] = useState<string | null>(null)
   const [showing, setShowing] = useState(true)
 
   // Initial screen open
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- random pick must wait for mount to keep SSR HTML deterministic
+    setMascot(pick())
     const t = setTimeout(() => setShowing(false), MIN_MS)
     return () => clearTimeout(t)
   }, [])
@@ -42,14 +46,16 @@ export function MascotReveal({ children }: { children: React.ReactNode }) {
     <>
       {showing && (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-bounce">
-            <Image
-              src={`/mascots/${mascot}.webp`}
-              alt="A carregar..."
-              width={220}
-              height={220}
-              priority
-            />
+          <div className="animate-bounce w-[220px] h-[220px]">
+            {mascot && (
+              <Image
+                src={`/mascots/${mascot}.webp`}
+                alt="A carregar..."
+                width={220}
+                height={220}
+                priority
+              />
+            )}
           </div>
         </div>
       )}

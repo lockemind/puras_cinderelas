@@ -31,7 +31,7 @@ export default async function PlayerLayout({
           alt="Puras Cinderelas"
           width={40}
           height={40}
-          className="rounded-full flex-shrink-0"
+          className="w-10 h-10 rounded-full flex-shrink-0"
         />
         <div>
           <p className="text-gold text-xs uppercase tracking-widest">
