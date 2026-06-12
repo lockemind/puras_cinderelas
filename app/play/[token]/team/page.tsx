@@ -2,10 +2,14 @@ import { notFound } from 'next/navigation'
 import { getPlayerByToken } from '@/actions/players'
 import { getPlayerTeams } from '@/actions/draft'
 import { getCompetition } from '@/actions/competition'
+import { getRankingsWithDeltas } from '@/actions/results'
+import { getFixtures } from '@/actions/fixtures'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ScoreHero } from '@/components/score-hero'
 import { TeamCard } from '@/components/team-card'
 import { TeamSelector } from '@/components/team-selector'
 import { getScoreBreakdown } from '@/lib/scoring'
+import { isTeamEliminated } from '@/lib/elimination'
 import type { TeamProgress, StageReached } from '@/lib/types'
 
 async function getTeamsByPot(pot: number) {
@@ -27,9 +31,11 @@ export default async function TeamPage({
   const player = await getPlayerByToken(token)
   if (!player) notFound()
 
-  const [competition, myTeams] = await Promise.all([
+  const [competition, myTeams, rankings, fixtures] = await Promise.all([
     getCompetition(),
     getPlayerTeams(player.id),
+    getRankingsWithDeltas(),
+    getFixtures(),
   ])
 
   const isDraft = competition.status === 'draft'
@@ -80,33 +86,44 @@ export default async function TeamPage({
     )
   }
 
+  const myEntry = rankings.find(r => r.player.id === player.id)
+
   return (
-    <div className="py-4 space-y-3">
-      {myTeams
-        .sort((a, b) => a.pot - b.pot)
-        .map(pt => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const team = pt.teams as any
-          const progress: TeamProgress = team.team_progress ?? {
-            team_id: team.id,
-            group_wins: 0,
-            group_draws: 0,
-            stage_reached: 'group_stage' as StageReached,
-            is_champion: false,
-            updated_at: '',
-          }
-          const breakdown = getScoreBreakdown(progress, pt.pot)
-          return (
-            <TeamCard
-              key={pt.id}
-              name={team.name}
-              flagEmoji={team.flag_emoji}
-              pot={pt.pot}
-              progress={progress}
-              breakdown={breakdown}
-            />
-          )
-        })}
+    <div className="py-2 space-y-4">
+      <ScoreHero
+        total={myEntry?.totalScore ?? 0}
+        rank={myEntry?.rank ?? null}
+        pointsToday={myEntry?.pointsToday ?? null}
+      />
+      <div className="space-y-2">
+        {myTeams
+          .sort((a, b) => a.pot - b.pot)
+          .map(pt => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const team = pt.teams as any
+            const progress: TeamProgress = team.team_progress ?? {
+              team_id: team.id,
+              group_wins: 0,
+              group_draws: 0,
+              stage_reached: 'group_stage' as StageReached,
+              is_champion: false,
+              updated_at: '',
+            }
+            const breakdown = getScoreBreakdown(progress, pt.pot)
+            return (
+              <TeamCard
+                key={pt.id}
+                name={team.name}
+                flagEmoji={team.flag_emoji}
+                mascot={team.mascot ?? null}
+                pot={pt.pot}
+                progress={progress}
+                breakdown={breakdown}
+                eliminated={isTeamEliminated(team.id, progress, fixtures)}
+              />
+            )
+          })}
+      </div>
     </div>
   )
 }

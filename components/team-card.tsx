@@ -1,3 +1,4 @@
+import { MascotAvatar } from '@/components/mascot-avatar'
 import type { ScoreBreakdown } from '@/lib/scoring'
 import type { TeamProgress } from '@/lib/types'
 
@@ -14,39 +15,68 @@ const STAGE_LABELS: Record<string, string> = {
 export function TeamCard({
   name,
   flagEmoji,
+  mascot,
   pot,
   progress,
   breakdown,
+  eliminated,
 }: {
   name: string
   flagEmoji: string
+  mascot: string | null
   pot: number
   progress: TeamProgress
   breakdown: ScoreBreakdown
+  eliminated: boolean
 }) {
+  const hasCinderela = breakdown.cinderelaBonusTotal > 0
+  const stageLabel =
+    eliminated && progress.stage_reached === 'group_stage'
+      ? 'Eliminado nos grupos'
+      : STAGE_LABELS[progress.stage_reached] ?? progress.stage_reached
+
   return (
-    <details className="rounded border border-night-border bg-night-card overflow-hidden">
-      <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer list-none select-none">
-        <span className="text-2xl">{flagEmoji}</span>
+    <details
+      className={`group rounded-xl border border-night-border bg-night-card overflow-hidden open:border-[1.5px] open:border-gold/50 ${
+        eliminated ? 'opacity-45' : ''
+      }`}
+    >
+      <summary className="flex items-center gap-3 px-3.5 py-[11px] cursor-pointer list-none select-none active:opacity-70 group-open:bg-gold/8">
+        <MascotAvatar
+          mascot={mascot}
+          alt={name}
+          size={42}
+          ring={eliminated ? 'eliminated' : 'default'}
+          fallbackEmoji={flagEmoji}
+          className={eliminated ? '' : 'group-open:border-gold'}
+        />
         <div className="flex-1 min-w-0">
-          <p className="text-foreground font-semibold truncate">{name}</p>
-          <p className="text-muted-foreground text-xs">
-            Pote {pot} · {STAGE_LABELS[progress.stage_reached] ?? progress.stage_reached}
+          <p className={`text-[15px] font-semibold truncate text-foreground ${eliminated ? 'line-through' : ''}`}>
+            {name}
+            {hasCinderela && !eliminated ? ' ✨' : ''}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Pote {pot} · {stageLabel}
           </p>
         </div>
-        <span className="text-gold font-bold text-lg tabular-nums">
+        <span className={`text-[17px] font-bold tabular-nums ${eliminated ? 'text-muted-foreground' : 'text-gold'}`}>
           {breakdown.total}
         </span>
+        <svg
+          className="w-3 h-3 text-[oklch(0.45_0.01_265)] shrink-0 transition-transform duration-200 group-open:rotate-180"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </summary>
 
-      <div className="px-4 pb-3 pt-2 border-t border-night-border space-y-1 text-sm">
+      <div className="px-4 pt-2.5 pb-3 border-t border-night-border space-y-1.5 text-[13px]">
         <div className="flex justify-between">
           <span className="text-muted-foreground">
             Fase de grupos ({progress.group_wins}V {progress.group_draws}E)
           </span>
-          <span className="text-foreground tabular-nums">
-            +{breakdown.groupStagePoints}
-          </span>
+          <span className="text-foreground tabular-nums">+{breakdown.groupStagePoints}</span>
         </div>
 
         {breakdown.knockoutDetail.map(r => (
@@ -56,18 +86,20 @@ export function TeamCard({
           </div>
         ))}
 
-        {breakdown.cinderelaBonusDetail.map(b => (
-          <div key={b.label} className="flex justify-between">
-            <span className="text-yellow-400/80 text-xs">
-              ✨ Bónus Cinderela · {b.label}
+        {hasCinderela && (
+          <div className="-mx-2 flex justify-between rounded-lg bg-gold-muted px-2 py-[5px]">
+            <span className="font-semibold text-gold">
+              ✨ Bónus Cinderela ×{breakdown.cinderelaBonusDetail.length}
             </span>
-            <span className="text-yellow-400 tabular-nums">+{b.points}</span>
+            <span className="font-bold text-gold tabular-nums">
+              +{breakdown.cinderelaBonusTotal}
+            </span>
           </div>
-        ))}
+        )}
 
-        <div className="flex justify-between border-t border-night-border pt-1 mt-1 font-semibold">
-          <span className="text-muted-foreground">Total</span>
-          <span className="text-gold">{breakdown.total} pts</span>
+        <div className="flex justify-between border-t border-night-border pt-1.5 mt-1.5">
+          <span className="text-muted-foreground font-semibold">Total</span>
+          <span className="text-gold font-bold tabular-nums">{breakdown.total} pts</span>
         </div>
       </div>
     </details>

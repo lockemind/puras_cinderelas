@@ -103,7 +103,7 @@ export async function getPlayerTeams(playerId: string) {
       id,
       pot,
       teams (
-        id, name, pot, flag_emoji, api_id,
+        id, name, pot, flag_emoji, api_id, mascot,
         team_progress (
           group_wins, group_draws, stage_reached, is_champion, updated_at
         )
