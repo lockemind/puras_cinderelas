@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { MascotAvatar } from '@/components/mascot-avatar'
 import type { RankingEntryWithDelta } from '@/actions/results'
 
@@ -23,15 +26,42 @@ export function RankingTable({
   const podium = rankings.slice(0, 3)
   const rest = rankings.slice(3)
   const myTop3 = podium.find(e => e.player.id === expandedId)
+  const [openPodiumId, setOpenPodiumId] = useState<string | null>(null)
+  const openPodiumEntry = podium.find(e => e.player.id === openPodiumId)
+
+  const togglePodium = (entry: RankingEntryWithDelta) => {
+    const canExpand = isLocked || entry.player.id === expandedId
+    if (!canExpand) return
+    setOpenPodiumId(prev => (prev === entry.player.id ? null : entry.player.id))
+  }
 
   return (
     <div className="space-y-3">
       {podium.length === 3 ? (
-        <div className="mt-3 grid grid-cols-[1fr_1.15fr_1fr] items-end gap-2">
-          <PodiumCard entry={podium[1]} place={2} />
-          <PodiumCard entry={podium[0]} place={1} />
-          <PodiumCard entry={podium[2]} place={3} />
-        </div>
+        <>
+          <div className="mt-3 grid grid-cols-[1fr_1.15fr_1fr] items-end gap-2">
+            <PodiumCard entry={podium[1]} place={2} isOpen={openPodiumId === podium[1].player.id} onToggle={togglePodium} />
+            <PodiumCard entry={podium[0]} place={1} isOpen={openPodiumId === podium[0].player.id} onToggle={togglePodium} />
+            <PodiumCard entry={podium[2]} place={3} isOpen={openPodiumId === podium[2].player.id} onToggle={togglePodium} />
+          </div>
+          {openPodiumEntry && (
+            <div
+              className={`overflow-hidden ${
+                openPodiumEntry.player.id === expandedId
+                  ? 'rounded-[10px] border-[1.5px] border-gold/55 bg-gold-muted'
+                  : 'rounded-[10px] border border-night-border bg-night-card'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                <RowHeader
+                  entry={openPodiumEntry}
+                  isCurrentPlayer={openPodiumEntry.player.id === expandedId}
+                />
+              </div>
+              <TeamsDetail entry={openPodiumEntry} />
+            </div>
+          )}
+        </>
       ) : (
         podium.map(e => (
           <RankingRow
@@ -60,12 +90,28 @@ export function RankingTable({
   )
 }
 
-function PodiumCard({ entry, place }: { entry: RankingEntryWithDelta; place: 1 | 2 | 3 }) {
+function PodiumCard({
+  entry,
+  place,
+  isOpen,
+  onToggle,
+}: {
+  entry: RankingEntryWithDelta
+  place: 1 | 2 | 3
+  isOpen: boolean
+  onToggle: (entry: RankingEntryWithDelta) => void
+}) {
   const pot1 = entry.teams.find(t => t.pot === 1)
 
   if (place === 1) {
     return (
-      <div className="relative flex flex-col items-center gap-[5px] rounded-[14px] border border-gold/45 bg-[linear-gradient(180deg,oklch(0.82_0.15_85/0.16),oklch(0.13_0.015_265))] px-2 pt-4 pb-3">
+      <button
+        type="button"
+        onClick={() => onToggle(entry)}
+        className={`relative flex w-full flex-col items-center gap-[5px] rounded-[14px] border bg-[linear-gradient(180deg,oklch(0.82_0.15_85/0.16),oklch(0.13_0.015_265))] px-2 pt-4 pb-3 active:opacity-70 ${
+          isOpen ? 'border-[1.5px] border-gold' : 'border-gold/45'
+        }`}
+      >
         <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 text-lg">👑</span>
         <MascotAvatar
           mascot={pot1?.team.mascot ?? null}
@@ -78,12 +124,18 @@ function PodiumCard({ entry, place }: { entry: RankingEntryWithDelta; place: 1 |
         <p className="max-w-full truncate text-sm font-bold text-foreground">{entry.player.name}</p>
         <p className="text-xl font-extrabold tabular-nums text-gold">{entry.totalScore}</p>
         <p className="text-[11px] font-semibold text-gold">1º</p>
-      </div>
+      </button>
     )
   }
 
   return (
-    <div className="flex flex-col items-center gap-[5px] rounded-xl border border-night-border bg-night-card px-2 pt-3 pb-2.5">
+    <button
+      type="button"
+      onClick={() => onToggle(entry)}
+      className={`flex w-full flex-col items-center gap-[5px] rounded-xl border bg-night-card px-2 pt-3 pb-2.5 active:opacity-70 ${
+        isOpen ? 'border-[1.5px] border-gold/55' : 'border-night-border'
+      }`}
+    >
       <MascotAvatar
         mascot={pot1?.team.mascot ?? null}
         alt={pot1?.team.name ?? ''}
@@ -95,6 +147,27 @@ function PodiumCard({ entry, place }: { entry: RankingEntryWithDelta; place: 1 |
       </p>
       <p className="text-base font-bold tabular-nums text-gold">{entry.totalScore}</p>
       <p className="text-[11px] text-muted-foreground">{place}º</p>
+    </button>
+  )
+}
+
+function TeamsDetail({ entry }: { entry: RankingEntryWithDelta }) {
+  return (
+    <div className="space-y-1 border-t border-night-border px-3.5 pb-3 pt-1">
+      {[...entry.teams]
+        .sort((a, b) => a.pot - b.pot)
+        .map(t => (
+          <div key={t.team.id} className="flex items-center gap-2 py-1 text-sm">
+            <span className="text-base">{t.team.flag_emoji}</span>
+            <span className="flex-1 text-foreground">{t.team.name}</span>
+            <span className="text-xs text-muted-foreground">
+              {STAGE_SHORT[t.progress.stage_reached] ?? t.progress.stage_reached}
+            </span>
+            <span className="text-xs font-semibold tabular-nums text-gold">
+              {t.breakdown.total} pts
+            </span>
+          </div>
+        ))}
     </div>
   )
 }
@@ -160,25 +233,6 @@ function RankingRow({
     ? 'rounded-[10px] border-[1.5px] border-gold/55 bg-gold-muted'
     : 'rounded-[10px] border border-night-border bg-night-card'
 
-  const teamsDetail = (
-    <div className="space-y-1 border-t border-night-border px-3.5 pb-3 pt-1">
-      {[...entry.teams]
-        .sort((a, b) => a.pot - b.pot)
-        .map(t => (
-          <div key={t.team.id} className="flex items-center gap-2 py-1 text-sm">
-            <span className="text-base">{t.team.flag_emoji}</span>
-            <span className="flex-1 text-foreground">{t.team.name}</span>
-            <span className="text-xs text-muted-foreground">
-              {STAGE_SHORT[t.progress.stage_reached] ?? t.progress.stage_reached}
-            </span>
-            <span className="text-xs font-semibold tabular-nums text-gold">
-              {t.breakdown.total} pts
-            </span>
-          </div>
-        ))}
-    </div>
-  )
-
   if (!canExpand) {
     return (
       <div className={`overflow-hidden ${rowClass}`}>
@@ -205,7 +259,7 @@ function RankingRow({
           <path d="M6 9l6 6 6-6" />
         </svg>
       </summary>
-      {teamsDetail}
+      <TeamsDetail entry={entry} />
     </details>
   )
 }
