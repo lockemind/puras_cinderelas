@@ -25,7 +25,6 @@ export function RankingTable({
 }) {
   const podium = rankings.slice(0, 3)
   const rest = rankings.slice(3)
-  const myTop3 = podium.find(e => e.player.id === expandedId)
   const [openPodiumId, setOpenPodiumId] = useState<string | null>(null)
   const openPodiumEntry = podium.find(e => e.player.id === openPodiumId)
 
@@ -40,9 +39,9 @@ export function RankingTable({
       {podium.length === 3 ? (
         <>
           <div className="mt-3 grid grid-cols-[1fr_1.15fr_1fr] items-end gap-2">
-            <PodiumCard entry={podium[1]} place={2} isOpen={openPodiumId === podium[1].player.id} onToggle={togglePodium} />
-            <PodiumCard entry={podium[0]} place={1} isOpen={openPodiumId === podium[0].player.id} onToggle={togglePodium} />
-            <PodiumCard entry={podium[2]} place={3} isOpen={openPodiumId === podium[2].player.id} onToggle={togglePodium} />
+            <PodiumCard entry={podium[1]} place={2} isOpen={openPodiumId === podium[1].player.id} isCurrentPlayer={podium[1].player.id === expandedId} onToggle={togglePodium} />
+            <PodiumCard entry={podium[0]} place={1} isOpen={openPodiumId === podium[0].player.id} isCurrentPlayer={podium[0].player.id === expandedId} onToggle={togglePodium} />
+            <PodiumCard entry={podium[2]} place={3} isOpen={openPodiumId === podium[2].player.id} isCurrentPlayer={podium[2].player.id === expandedId} onToggle={togglePodium} />
           </div>
           {openPodiumEntry && (
             <div
@@ -74,9 +73,6 @@ export function RankingTable({
       )}
 
       <div className="space-y-1.5">
-        {podium.length === 3 && myTop3 && (
-          <RankingRow entry={myTop3} isCurrentPlayer isLocked={isLocked} />
-        )}
         {rest.map(entry => (
           <RankingRow
             key={entry.player.id}
@@ -94,14 +90,21 @@ function PodiumCard({
   entry,
   place,
   isOpen,
+  isCurrentPlayer,
   onToggle,
 }: {
   entry: RankingEntryWithDelta
   place: 1 | 2 | 3
   isOpen: boolean
+  isCurrentPlayer: boolean
   onToggle: (entry: RankingEntryWithDelta) => void
 }) {
   const pot1 = entry.teams.find(t => t.pot === 1)
+  const tuBadge = isCurrentPlayer && (
+    <span className="rounded-md bg-gold px-1.5 py-0.5 text-[9px] font-extrabold tracking-[1px] text-night">
+      TU
+    </span>
+  )
 
   if (place === 1) {
     return (
@@ -121,7 +124,10 @@ function PodiumCard({
           ringWidth={2.5}
           fallbackEmoji={pot1?.team.flag_emoji}
         />
-        <p className="max-w-full truncate text-sm font-bold text-foreground">{entry.player.name}</p>
+        <p className="flex max-w-full items-center gap-1.5 truncate text-sm font-bold text-foreground">
+          {entry.player.name}
+          {tuBadge}
+        </p>
         <p className="text-xl font-extrabold tabular-nums text-gold">{entry.totalScore}</p>
         <p className="text-[11px] font-semibold text-gold">1º</p>
       </button>
@@ -142,8 +148,9 @@ function PodiumCard({
         size={place === 2 ? 46 : 42}
         fallbackEmoji={pot1?.team.flag_emoji}
       />
-      <p className="max-w-full truncate text-[13px] font-semibold text-foreground">
+      <p className="flex max-w-full items-center gap-1.5 truncate text-[13px] font-semibold text-foreground">
         {entry.player.name}
+        {tuBadge}
       </p>
       <p className="text-base font-bold tabular-nums text-gold">{entry.totalScore}</p>
       <p className="text-[11px] text-muted-foreground">{place}º</p>
