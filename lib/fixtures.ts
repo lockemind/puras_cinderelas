@@ -2,7 +2,7 @@ import type { Fixture } from './types'
 
 const LISBON_TZ = 'Europe/Lisbon'
 
-function toDateKey(utcDate: string): string {
+export function toDateKey(utcDate: string): string {
   return new Intl.DateTimeFormat('pt-PT', {
     timeZone: LISBON_TZ,
     year: 'numeric',
@@ -54,4 +54,40 @@ export function groupFixturesByDate(fixtures: Fixture[]): FixtureGroup[] {
   }
 
   return Array.from(map.values())
+}
+
+export const LIVE_STATUSES = ['IN_PLAY', 'PAUSED', 'LIVE']
+
+const SETTLED_STATUSES = ['FINISHED', 'CANCELLED', 'POSTPONED']
+
+export type PlayerFixtures = {
+  hero: Fixture | null
+  myToday: Fixture[]
+  othersToday: Fixture[]
+}
+
+export function splitFixturesForPlayer(
+  fixtures: Fixture[],
+  myTeamIds: Set<string>,
+  now: Date = new Date()
+): PlayerFixtures {
+  const isMine = (f: Fixture) =>
+    (f.home_team != null && myTeamIds.has(f.home_team.id)) ||
+    (f.away_team != null && myTeamIds.has(f.away_team.id))
+
+  const sorted = [...fixtures].sort(
+    (a, b) => new Date(a.utc_date).getTime() - new Date(b.utc_date).getTime()
+  )
+
+  const hero =
+    sorted.find(f => isMine(f) && !SETTLED_STATUSES.includes(f.status)) ?? null
+
+  const todayKey = toDateKey(now.toISOString())
+  const today = sorted.filter(f => toDateKey(f.utc_date) === todayKey)
+
+  return {
+    hero,
+    myToday: today.filter(f => isMine(f) && f.id !== hero?.id),
+    othersToday: today.filter(f => !isMine(f)),
+  }
 }

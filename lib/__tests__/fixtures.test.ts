@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupFixturesByDate } from '../fixtures'
+import { groupFixturesByDate, splitFixturesForPlayer } from '../fixtures'
 import type { Fixture } from '../types'
 
 const mkFixture = (overrides: Partial<Fixture> & { utc_date: string }): Fixture => ({
@@ -46,5 +46,54 @@ describe('groupFixturesByDate', () => {
     const groups = groupFixturesByDate(fixtures)
     expect(typeof groups[0].label).toBe('string')
     expect(groups[0].label.length).toBeGreaterThan(0)
+  })
+})
+
+describe('splitFixturesForPlayer', () => {
+  const MY = 't-mine'
+  const now = new Date('2026-06-12T15:00:00Z')
+  const mine = (utc: string, status = 'TIMED', id = `m-${utc}-${status}`) =>
+    mkFixture({
+      id,
+      utc_date: utc,
+      status,
+      home_team: { id: MY, name: 'Mine', flag_emoji: '🏳️', mascot: null },
+    })
+  const other = (utc: string, status = 'TIMED', id = `o-${utc}-${status}`) =>
+    mkFixture({ id, utc_date: utc, status })
+
+  it('hero is my live fixture when one is live', () => {
+    const live = mine('2026-06-12T14:00:00Z', 'IN_PLAY')
+    const upcoming = mine('2026-06-12T20:00:00Z')
+    const { hero } = splitFixturesForPlayer([upcoming, live], new Set([MY]), now)
+    expect(hero?.id).toBe(live.id)
+  })
+
+  it('hero is my soonest upcoming fixture otherwise, even on a later day', () => {
+    const past = mine('2026-06-11T20:00:00Z', 'FINISHED')
+    const next = mine('2026-06-14T18:00:00Z')
+    const { hero } = splitFixturesForPlayer([next, past], new Set([MY]), now)
+    expect(hero?.id).toBe(next.id)
+  })
+
+  it("myToday lists today's games with my teams, excluding the hero", () => {
+    const heroFixture = mine('2026-06-12T16:00:00Z')
+    const laterToday = mine('2026-06-12T20:00:00Z')
+    const { myToday } = splitFixturesForPlayer([heroFixture, laterToday], new Set([MY]), now)
+    expect(myToday.map(f => f.id)).toEqual([laterToday.id])
+  })
+
+  it("othersToday lists today's games not involving my teams, in kickoff order", () => {
+    const a = other('2026-06-12T18:00:00Z')
+    const b = other('2026-06-12T13:00:00Z', 'FINISHED')
+    const tomorrow = other('2026-06-13T18:00:00Z')
+    const { othersToday } = splitFixturesForPlayer([a, b, tomorrow], new Set([MY]), now)
+    expect(othersToday.map(f => f.id)).toEqual([b.id, a.id])
+  })
+
+  it('hero is null when I have no remaining fixtures', () => {
+    const done = mine('2026-06-11T20:00:00Z', 'FINISHED')
+    const { hero } = splitFixturesForPlayer([done], new Set([MY]), now)
+    expect(hero).toBeNull()
   })
 })
