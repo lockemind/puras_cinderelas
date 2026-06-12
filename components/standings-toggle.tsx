@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import type { getRankings, getAllTeamsWithProgress } from '@/actions/results'
+import type { getAllTeamsWithProgress, RankingEntryWithDelta } from '@/actions/results'
 import { RankingTable } from '@/components/ranking-table'
 import { TeamStandings } from '@/components/team-standings'
 
 type Props = {
-  rankings: Awaited<ReturnType<typeof getRankings>>
+  rankings: RankingEntryWithDelta[]
   teams: Awaited<ReturnType<typeof getAllTeamsWithProgress>>
   expandedPlayerId: string
   isLocked: boolean

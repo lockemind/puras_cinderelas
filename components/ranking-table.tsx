@@ -1,7 +1,5 @@
-import Image from 'next/image'
-import type { getRankings } from '@/actions/results'
-
-type Rankings = Awaited<ReturnType<typeof getRankings>>
+import { MascotAvatar } from '@/components/mascot-avatar'
+import type { RankingEntryWithDelta } from '@/actions/results'
 
 const STAGE_SHORT: Record<string, string> = {
   group_stage: 'Grupos',
@@ -18,104 +16,162 @@ export function RankingTable({
   expandedId,
   isLocked,
 }: {
-  rankings: Rankings
+  rankings: RankingEntryWithDelta[]
   expandedId?: string
   isLocked: boolean
 }) {
+  const podium = rankings.slice(0, 3)
+  const rest = rankings.slice(3)
+  const myTop3 = podium.find(e => e.player.id === expandedId)
+
   return (
-    <div className="space-y-1">
-      {rankings.map((entry, idx) => (
-        <RankingRow
-          key={entry.player.id}
-          position={idx + 1}
-          entry={entry}
-          isCurrentPlayer={expandedId === entry.player.id}
-          isLocked={isLocked}
-        />
-      ))}
+    <div className="space-y-3">
+      {podium.length === 3 ? (
+        <div className="mt-3 grid grid-cols-[1fr_1.15fr_1fr] items-end gap-2">
+          <PodiumCard entry={podium[1]} place={2} />
+          <PodiumCard entry={podium[0]} place={1} />
+          <PodiumCard entry={podium[2]} place={3} />
+        </div>
+      ) : (
+        podium.map(e => (
+          <RankingRow
+            key={e.player.id}
+            entry={e}
+            isCurrentPlayer={e.player.id === expandedId}
+            isLocked={isLocked}
+          />
+        ))
+      )}
+
+      <div className="space-y-1.5">
+        {podium.length === 3 && myTop3 && (
+          <RankingRow entry={myTop3} isCurrentPlayer isLocked={isLocked} />
+        )}
+        {rest.map(entry => (
+          <RankingRow
+            key={entry.player.id}
+            entry={entry}
+            isCurrentPlayer={entry.player.id === expandedId}
+            isLocked={isLocked}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
-function MascotIcons({ teams }: { teams: Rankings[number]['teams'] }) {
+function PodiumCard({ entry, place }: { entry: RankingEntryWithDelta; place: 1 | 2 | 3 }) {
+  const pot1 = entry.teams.find(t => t.pot === 1)
+
+  if (place === 1) {
+    return (
+      <div className="relative flex flex-col items-center gap-[5px] rounded-[14px] border border-gold/45 bg-[linear-gradient(180deg,oklch(0.82_0.15_85/0.16),oklch(0.13_0.015_265))] px-2 pt-4 pb-3">
+        <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 text-lg">👑</span>
+        <MascotAvatar
+          mascot={pot1?.team.mascot ?? null}
+          alt={pot1?.team.name ?? ''}
+          size={58}
+          ring="gold"
+          ringWidth={2.5}
+          fallbackEmoji={pot1?.team.flag_emoji}
+        />
+        <p className="max-w-full truncate text-sm font-bold text-foreground">{entry.player.name}</p>
+        <p className="text-xl font-extrabold tabular-nums text-gold">{entry.totalScore}</p>
+        <p className="text-[11px] font-semibold text-gold">1º</p>
+      </div>
+    )
+  }
+
   return (
-    <span className="flex items-center gap-0.5 flex-shrink-0">
-      {teams.map(t =>
-        t.team.mascot ? (
-          <Image
-            key={t.pot}
-            src={`/mascots/icons/${t.team.mascot}.webp`}
-            alt={t.team.name}
-            width={20}
-            height={20}
-            className="rounded-sm"
-          />
-        ) : null
-      )}
-    </span>
+    <div className="flex flex-col items-center gap-[5px] rounded-xl border border-night-border bg-night-card px-2 pt-3 pb-2.5">
+      <MascotAvatar
+        mascot={pot1?.team.mascot ?? null}
+        alt={pot1?.team.name ?? ''}
+        size={place === 2 ? 46 : 42}
+        fallbackEmoji={pot1?.team.flag_emoji}
+      />
+      <p className="max-w-full truncate text-[13px] font-semibold text-foreground">
+        {entry.player.name}
+      </p>
+      <p className="text-base font-bold tabular-nums text-gold">{entry.totalScore}</p>
+      <p className="text-[11px] text-muted-foreground">{place}º</p>
+    </div>
+  )
+}
+
+function Delta({ delta }: { delta: number | null }) {
+  if (delta == null || delta === 0) {
+    return <span className="text-[11px] font-semibold text-[oklch(0.40_0.01_265)]">—</span>
+  }
+  return delta > 0 ? (
+    <span className="text-[11px] font-semibold text-[oklch(0.7_0.14_150)]">▲{delta}</span>
+  ) : (
+    <span className="text-[11px] font-semibold text-destructive">▼{Math.abs(delta)}</span>
   )
 }
 
 function RowHeader({
-  position,
   entry,
   isCurrentPlayer,
-  isLocked,
 }: {
-  position: number
-  entry: Rankings[number]
+  entry: RankingEntryWithDelta
   isCurrentPlayer: boolean
-  isLocked: boolean
 }) {
-  const showAllIcons = isLocked || isCurrentPlayer
-  const sortedTeams = [...entry.teams].sort((a, b) => a.pot - b.pot)
-  const pot1Team = sortedTeams.find(t => t.pot === 1)
-  const iconsToShow = showAllIcons ? sortedTeams : pot1Team ? [pot1Team] : []
-
   return (
     <>
-      <span className="text-muted-foreground text-sm w-5 text-center font-mono">
-        {position}
+      <span className="w-[18px] text-center text-[13px] text-muted-foreground tabular-nums">
+        {entry.rank}
       </span>
-      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        <span className="text-foreground font-medium truncate">{entry.player.name}</span>
-        {iconsToShow.length > 0 && <MascotIcons teams={iconsToShow} />}
-      </div>
-      <span className="text-gold font-bold tabular-nums">
-        {entry.totalScore} pts
+      <span
+        className={`flex flex-1 items-center gap-2 truncate text-sm text-foreground ${
+          isCurrentPlayer ? 'font-bold' : 'font-medium'
+        }`}
+      >
+        {entry.player.name}
+        {isCurrentPlayer && (
+          <span className="rounded-md bg-gold px-1.5 py-0.5 text-[9px] font-extrabold tracking-[1px] text-night">
+            TU
+          </span>
+        )}
+      </span>
+      <Delta delta={entry.rankDelta} />
+      <span
+        className={`text-sm tabular-nums text-gold ${
+          isCurrentPlayer ? 'font-extrabold' : 'font-bold'
+        }`}
+      >
+        {entry.totalScore}
       </span>
     </>
   )
 }
 
 function RankingRow({
-  position,
   entry,
   isCurrentPlayer,
   isLocked,
 }: {
-  position: number
-  entry: Rankings[number]
+  entry: RankingEntryWithDelta
   isCurrentPlayer: boolean
   isLocked: boolean
 }) {
   const canExpand = isLocked || isCurrentPlayer
+  const rowClass = isCurrentPlayer
+    ? 'rounded-[10px] border-[1.5px] border-gold/55 bg-gold-muted'
+    : 'rounded-[10px] border border-night-border bg-night-card'
 
   const teamsDetail = (
-    <div className="px-4 pb-3 border-t border-night-border space-y-1">
-      {entry.teams
+    <div className="space-y-1 border-t border-night-border px-3.5 pb-3 pt-1">
+      {[...entry.teams]
         .sort((a, b) => a.pot - b.pot)
         .map(t => (
-          <div
-            key={t.team.id}
-            className="flex items-center gap-2 text-sm py-1"
-          >
+          <div key={t.team.id} className="flex items-center gap-2 py-1 text-sm">
             <span className="text-base">{t.team.flag_emoji}</span>
-            <span className="text-foreground flex-1">{t.team.name}</span>
-            <span className="text-muted-foreground text-xs">
+            <span className="flex-1 text-foreground">{t.team.name}</span>
+            <span className="text-xs text-muted-foreground">
               {STAGE_SHORT[t.progress.stage_reached] ?? t.progress.stage_reached}
             </span>
-            <span className="text-gold font-semibold tabular-nums text-xs">
+            <span className="text-xs font-semibold tabular-nums text-gold">
               {t.breakdown.total} pts
             </span>
           </div>
@@ -125,33 +181,20 @@ function RankingRow({
 
   if (!canExpand) {
     return (
-      <div className="rounded border border-night-border bg-night-card overflow-hidden">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <RowHeader
-            position={position}
-            entry={entry}
-            isCurrentPlayer={isCurrentPlayer}
-            isLocked={isLocked}
-          />
+      <div className={`overflow-hidden ${rowClass}`}>
+        <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+          <RowHeader entry={entry} isCurrentPlayer={isCurrentPlayer} />
         </div>
       </div>
     )
   }
 
   return (
-    <details
-      open={isCurrentPlayer}
-      className="group rounded border border-night-border bg-night-card overflow-hidden"
-    >
-      <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer list-none select-none">
-        <RowHeader
-          position={position}
-          entry={entry}
-          isCurrentPlayer={isCurrentPlayer}
-          isLocked={isLocked}
-        />
+    <details open={isCurrentPlayer} className={`group overflow-hidden ${rowClass}`}>
+      <summary className="flex cursor-pointer list-none select-none items-center gap-2.5 px-3.5 py-2.5 active:opacity-70">
+        <RowHeader entry={entry} isCurrentPlayer={isCurrentPlayer} />
         <svg
-          className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 transition-transform duration-200 group-open:rotate-180"
+          className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getPlayerByToken } from '@/actions/players'
-import { getRankings, getAllTeamsWithProgress } from '@/actions/results'
+import { getRankingsWithDeltas, getAllTeamsWithProgress } from '@/actions/results'
 import { getCompetition } from '@/actions/competition'
 import { SyncIndicator } from '@/components/sync-indicator'
 import { StandingsToggle } from '@/components/standings-toggle'
@@ -15,7 +15,7 @@ export default async function RankingPage({
   if (!player) notFound()
 
   const [rankings, teams, competition] = await Promise.all([
-    getRankings(),
+    getRankingsWithDeltas(),
     getAllTeamsWithProgress(),
     getCompetition(),
   ])

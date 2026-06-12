@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { getCompetition } from '@/actions/competition'
-import { getRankings } from '@/actions/results'
+import { getRankingsWithDeltas } from '@/actions/results'
 import { RankingTable } from '@/components/ranking-table'
 import { SyncIndicator } from '@/components/sync-indicator'
 
@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 export default async function PublicPage() {
   const [competition, rankings] = await Promise.all([
     getCompetition(),
-    getRankings(),
+    getRankingsWithDeltas(),
   ])
 
   const isRunningOrAfter = ['running', 'finished'].includes(competition.status)
@@ -31,7 +31,7 @@ export default async function PublicPage() {
           alt="Puras Cinderelas"
           width={120}
           height={120}
-          className="mx-auto mb-4 rounded-full"
+          className="mx-auto mb-4 w-[120px] h-[120px] rounded-full"
           priority
         />
         <p className="text-gold text-xs uppercase tracking-widest mb-1">
