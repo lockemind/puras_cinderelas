@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Git worktrees and nested build output (e.g. .worktrees/build/.next):
+    ".worktrees/**",
+    "**/.next/**",
+    // Design handoff artifacts, not app source:
+    "design_handoff_live_redesign/**",
   ]),
 ]);
 
