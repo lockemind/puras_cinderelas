@@ -98,3 +98,24 @@ export function getScoreBreakdown(progress: TeamProgress, pot: number): ScoreBre
 export function calculateTeamScore(progress: TeamProgress, pot: number): number {
   return getScoreBreakdown(progress, pot).total
 }
+
+// football-data fixture stage → StageReached the winner advances into
+export const FD_WINNER_ADVANCES_TO: Partial<Record<string, StageReached>> = {
+  LAST_32: 'r16',
+  LAST_16: 'qf',
+  QUARTER_FINALS: 'sf',
+  SEMI_FINALS: 'final',
+  FINAL: 'champion',
+}
+
+export type WinWorth = { winPoints: number; cinderelaBonus: number }
+
+export function getWinWorth(fdStage: string, pot: number): WinWorth {
+  if (fdStage === 'GROUP_STAGE') return { winPoints: 3, cinderelaBonus: 0 }
+  const advancesTo = FD_WINNER_ADVANCES_TO[fdStage]
+  if (!advancesTo) return { winPoints: 0, cinderelaBonus: 0 }
+  const winPoints = POINTS_FOR_WINNING_INTO[advancesTo] ?? 0
+  const cinderelaBonus =
+    pot === 3 || pot === 4 ? CINDERELA_BONUS[pot as 3 | 4][advancesTo] ?? 0 : 0
+  return { winPoints, cinderelaBonus }
+}

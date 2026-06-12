@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getScoreBreakdown, calculateTeamScore } from '../scoring'
+import { getScoreBreakdown, calculateTeamScore, getWinWorth } from '../scoring'
 import type { TeamProgress } from '../types'
 
 const mkProgress = (overrides: Partial<TeamProgress>): TeamProgress => ({
@@ -160,5 +160,36 @@ describe('full score calculation', () => {
     // total = 67
     const p = mkProgress({ group_wins: 2, group_draws: 1, stage_reached: 'sf' })
     expect(calculateTeamScore(p, 3)).toBe(67)
+  })
+})
+
+describe('getWinWorth', () => {
+  it('group stage win is worth 3 points, no bonus, any pot', () => {
+    expect(getWinWorth('GROUP_STAGE', 1)).toEqual({ winPoints: 3, cinderelaBonus: 0 })
+    expect(getWinWorth('GROUP_STAGE', 4)).toEqual({ winPoints: 3, cinderelaBonus: 0 })
+  })
+
+  it('knockout win points follow POINTS_FOR_WINNING_INTO', () => {
+    expect(getWinWorth('LAST_32', 1).winPoints).toBe(5)
+    expect(getWinWorth('LAST_16', 1).winPoints).toBe(8)
+    expect(getWinWorth('QUARTER_FINALS', 1).winPoints).toBe(12)
+    expect(getWinWorth('SEMI_FINALS', 1).winPoints).toBe(15)
+    expect(getWinWorth('FINAL', 1).winPoints).toBe(25)
+  })
+
+  it('cinderela bonus is the milestone of the stage the winner advances into', () => {
+    expect(getWinWorth('LAST_32', 3).cinderelaBonus).toBe(7)   // pot 3 reaches r16
+    expect(getWinWorth('LAST_32', 4).cinderelaBonus).toBe(10)  // pot 4 reaches r16
+    expect(getWinWorth('QUARTER_FINALS', 4).cinderelaBonus).toBe(20) // pot 4 reaches sf
+    expect(getWinWorth('FINAL', 4).cinderelaBonus).toBe(30)    // pot 4 champion
+  })
+
+  it('pots 1 and 2 never get a bonus', () => {
+    expect(getWinWorth('FINAL', 1).cinderelaBonus).toBe(0)
+    expect(getWinWorth('SEMI_FINALS', 2).cinderelaBonus).toBe(0)
+  })
+
+  it('unknown stage is worth nothing', () => {
+    expect(getWinWorth('THIRD_PLACE', 1)).toEqual({ winPoints: 0, cinderelaBonus: 0 })
   })
 })
