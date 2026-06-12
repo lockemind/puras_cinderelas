@@ -27,7 +27,7 @@ export function TeamStandings({ teams }: { teams: Teams }) {
               .filter(t => t.pot === pot)
               .map(team => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const progress: TeamProgress = (team.team_progress as any)?.[0] ?? {
+                const progress: TeamProgress = (team.team_progress as any) ?? {
                   team_id: team.id,
                   group_wins: 0,
                   group_draws: 0,

@@ -87,7 +87,7 @@ export default async function TeamPage({
         .map(pt => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const team = pt.teams as any
-          const progress: TeamProgress = team.team_progress?.[0] ?? {
+          const progress: TeamProgress = team.team_progress ?? {
             team_id: team.id,
             group_wins: 0,
             group_draws: 0,
