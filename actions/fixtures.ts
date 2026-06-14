@@ -80,8 +80,8 @@ export async function getFixtureOwnership(
       stage_reached: 'group_stage' as StageReached,
       is_champion: false,
     }
-    const progress = mergeProgress(dbProgress, liveStats.get(team.id))
-    const breakdown = getScoreBreakdown(progress, pt.pot)
+    const merged = mergeProgress(dbProgress, liveStats.get(team.id))
+    const breakdown = getScoreBreakdown({ team_id: team.id, ...merged, updated_at: '' }, pt.pot)
     return {
       player,
       team: { id: team.id, name: team.name, flag_emoji: team.flag_emoji },
