@@ -101,15 +101,18 @@ export default async function TeamPage({
           .map(pt => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const team = pt.teams as any
-            const progress: TeamProgress = team.team_progress ?? {
-              team_id: team.id,
-              group_wins: 0,
-              group_draws: 0,
-              stage_reached: 'group_stage' as StageReached,
-              is_champion: false,
-              updated_at: '',
-            }
-            const breakdown = getScoreBreakdown(progress, pt.pot)
+            const rankingTeam = myEntry?.teams.find(t => t.team.id === team.id)
+            const progress: TeamProgress = rankingTeam?.progress
+              ? { ...rankingTeam.progress, team_id: team.id, updated_at: '' }
+              : (team.team_progress ?? {
+                  team_id: team.id,
+                  group_wins: 0,
+                  group_draws: 0,
+                  stage_reached: 'group_stage' as StageReached,
+                  is_champion: false,
+                  updated_at: '',
+                })
+            const breakdown = rankingTeam?.breakdown ?? getScoreBreakdown(progress, pt.pot)
             return (
               <TeamCard
                 key={pt.id}

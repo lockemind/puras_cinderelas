@@ -2,8 +2,72 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getScoreBreakdown } from '@/lib/scoring'
+import { getScoreBreakdown, FD_WINNER_ADVANCES_TO } from '@/lib/scoring'
 import type { StageReached } from '@/lib/types'
+
+const FD_LOSER_STAGE: Partial<Record<string, StageReached>> = {
+  LAST_32: 'r32',
+  LAST_16: 'r16',
+  QUARTER_FINALS: 'qf',
+  SEMI_FINALS: 'sf',
+  FINAL: 'final',
+}
+
+type FixtureRow = {
+  stage: string
+  home_team_id: string | null
+  away_team_id: string | null
+  home_score: number | null
+  away_score: number | null
+}
+
+function computeTeamStatsFromFixtures(fixtures: FixtureRow[]) {
+  const stats = new Map<string, {
+    group_wins: number
+    group_draws: number
+    stage_reached: StageReached
+    is_champion: boolean
+  }>()
+
+  const ensure = (id: string) => {
+    if (!stats.has(id))
+      stats.set(id, { group_wins: 0, group_draws: 0, stage_reached: 'group_stage', is_champion: false })
+    return stats.get(id)!
+  }
+
+  for (const f of fixtures) {
+    const h = f.home_team_id
+    const a = f.away_team_id
+    if (f.home_score == null || f.away_score == null) continue
+
+    if (f.stage === 'GROUP_STAGE') {
+      if (f.home_score > f.away_score) {
+        if (h) ensure(h).group_wins++
+      } else if (f.away_score > f.home_score) {
+        if (a) ensure(a).group_wins++
+      } else {
+        if (h) ensure(h).group_draws++
+        if (a) ensure(a).group_draws++
+      }
+    } else {
+      const loserStage = FD_LOSER_STAGE[f.stage]
+      const winnerStage = FD_WINNER_ADVANCES_TO[f.stage]
+      if (!loserStage || !winnerStage) continue
+      if (f.home_score !== f.away_score) {
+        const winnerId = f.home_score > f.away_score ? h : a
+        const loserId = f.home_score > f.away_score ? a : h
+        if (loserId) ensure(loserId).stage_reached = loserStage
+        if (winnerId) {
+          const s = ensure(winnerId)
+          s.stage_reached = winnerStage
+          if (winnerStage === 'champion') s.is_champion = true
+        }
+      }
+    }
+  }
+
+  return stats
+}
 
 export type UpdateTeamProgressInput = {
   teamId: string
@@ -79,24 +143,30 @@ export async function getAllTeamsWithProgress() {
 export async function getRankings() {
   const supabase = createAdminClient()
 
-  const { data: players, error: pErr } = await supabase
-    .from('players')
-    .select('id, name, access_token')
-    .order('name', { ascending: true })
+  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, { data: finishedFixtures }] = await Promise.all([
+    supabase
+      .from('players')
+      .select('id, name, access_token')
+      .order('name', { ascending: true }),
+    supabase
+      .from('player_teams')
+      .select(`
+        player_id, pot,
+        teams (
+          id, name, pot, flag_emoji, mascot,
+          team_progress ( group_wins, group_draws, stage_reached, is_champion )
+        )
+      `),
+    supabase
+      .from('fixtures')
+      .select('stage, home_team_id, away_team_id, home_score, away_score')
+      .eq('status', 'FINISHED'),
+  ])
 
   if (pErr || !players) throw pErr ?? new Error('Could not fetch players')
-
-  const { data: playerTeams, error: ptErr } = await supabase
-    .from('player_teams')
-    .select(`
-      player_id, pot,
-      teams (
-        id, name, pot, flag_emoji, mascot,
-        team_progress ( group_wins, group_draws, stage_reached, is_champion )
-      )
-    `)
-
   if (ptErr) throw ptErr
+
+  const liveStats = computeTeamStatsFromFixtures((finishedFixtures ?? []) as FixtureRow[])
 
   const ranked = players.map(player => {
     const myTeams = (playerTeams ?? []).filter(pt => pt.player_id === player.id)
@@ -104,8 +174,17 @@ export async function getRankings() {
     const teamsWithScores = myTeams.map(pt => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const team = pt.teams as any
-      const progress = team?.team_progress ?? {
+      const dbProgress = team?.team_progress ?? {
         group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false,
+      }
+      const live = liveStats.get(team.id)
+      const progress = {
+        team_id: team.id as string,
+        group_wins: live?.group_wins ?? dbProgress.group_wins,
+        group_draws: live?.group_draws ?? dbProgress.group_draws,
+        stage_reached: (live && live.stage_reached !== 'group_stage' ? live.stage_reached : dbProgress.stage_reached) as StageReached,
+        is_champion: live?.is_champion ?? dbProgress.is_champion,
+        updated_at: dbProgress.updated_at ?? '',
       }
       const breakdown = getScoreBreakdown(progress, pt.pot)
       return {
