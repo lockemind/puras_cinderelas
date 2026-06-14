@@ -39,6 +39,19 @@ export type ScoreBreakdown = {
   total: number
 }
 
+export function mergeProgress(
+  db: { group_wins: number; group_draws: number; stage_reached: StageReached; is_champion: boolean },
+  live: { group_wins: number; group_draws: number; stage_reached: StageReached; is_champion: boolean } | undefined,
+) {
+  if (!live) return db
+  return {
+    group_wins: live.group_wins,
+    group_draws: live.group_draws,
+    stage_reached: (live.stage_reached !== 'group_stage' ? live.stage_reached : db.stage_reached) as StageReached,
+    is_champion: live.is_champion,
+  }
+}
+
 export function getScoreBreakdown(progress: TeamProgress, pot: number): ScoreBreakdown {
   const groupStagePoints = progress.group_wins * 3 + progress.group_draws
 

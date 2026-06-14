@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getScoreBreakdown, calculateTeamScore, getWinWorth } from '../scoring'
+import { getScoreBreakdown, calculateTeamScore, getWinWorth, mergeProgress } from '../scoring'
 import type { TeamProgress } from '../types'
 
 const mkProgress = (overrides: Partial<TeamProgress>): TeamProgress => ({
@@ -191,5 +191,36 @@ describe('getWinWorth', () => {
 
   it('unknown stage is worth nothing', () => {
     expect(getWinWorth('THIRD_PLACE', 1)).toEqual({ winPoints: 0, cinderelaBonus: 0 })
+  })
+})
+
+describe('mergeProgress', () => {
+  const db = { group_wins: 1, group_draws: 0, stage_reached: 'group_stage' as const, is_champion: false }
+
+  it('returns DB values when no live data', () => {
+    expect(mergeProgress(db, undefined)).toEqual(db)
+  })
+
+  it('live overrides group_wins and group_draws', () => {
+    const live = { group_wins: 3, group_draws: 2, stage_reached: 'group_stage' as const, is_champion: false }
+    const result = mergeProgress(db, live)
+    expect(result.group_wins).toBe(3)
+    expect(result.group_draws).toBe(2)
+  })
+
+  it('live group_stage does NOT override a more advanced DB stage', () => {
+    const dbAdvanced = { ...db, stage_reached: 'qf' as const }
+    const live = { group_wins: 2, group_draws: 1, stage_reached: 'group_stage' as const, is_champion: false }
+    expect(mergeProgress(dbAdvanced, live).stage_reached).toBe('qf')
+  })
+
+  it('live knockout stage DOES override DB group_stage', () => {
+    const live = { group_wins: 2, group_draws: 1, stage_reached: 'r16' as const, is_champion: false }
+    expect(mergeProgress(db, live).stage_reached).toBe('r16')
+  })
+
+  it('live is_champion overrides DB', () => {
+    const live = { group_wins: 3, group_draws: 0, stage_reached: 'champion' as const, is_champion: true }
+    expect(mergeProgress(db, live).is_champion).toBe(true)
   })
 })

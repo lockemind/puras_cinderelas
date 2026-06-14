@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getScoreBreakdown, FD_WINNER_ADVANCES_TO } from '@/lib/scoring'
+import { getScoreBreakdown, mergeProgress, FD_WINNER_ADVANCES_TO } from '@/lib/scoring'
 import type { StageReached } from '@/lib/types'
 
 const FD_LOSER_STAGE: Partial<Record<string, StageReached>> = {
@@ -69,6 +69,15 @@ function computeTeamStatsFromFixtures(fixtures: FixtureRow[]) {
   return stats
 }
 
+export async function fetchLiveStats() {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('fixtures')
+    .select('stage, home_team_id, away_team_id, home_score, away_score')
+    .eq('status', 'FINISHED')
+  return computeTeamStatsFromFixtures((data ?? []) as FixtureRow[])
+}
+
 export type UpdateTeamProgressInput = {
   teamId: string
   groupWins: number
@@ -125,25 +134,38 @@ export async function triggerManualSync() {
 
 export async function getAllTeamsWithProgress() {
   const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from('teams')
-    .select(`
-      id, name, pot, flag_emoji,
-      team_progress (
-        group_wins, group_draws, stage_reached, is_champion, updated_at
-      )
-    `)
-    .order('pot', { ascending: true })
-    .order('name', { ascending: true })
+  const [{ data, error }, liveStats] = await Promise.all([
+    supabase
+      .from('teams')
+      .select(`
+        id, name, pot, flag_emoji,
+        team_progress (
+          group_wins, group_draws, stage_reached, is_champion, updated_at
+        )
+      `)
+      .order('pot', { ascending: true })
+      .order('name', { ascending: true }),
+    fetchLiveStats(),
+  ])
 
   if (error) throw error
-  return data
+
+  return (data ?? []).map(team => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = (team.team_progress as any) ?? {
+      group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false, updated_at: '',
+    }
+    return {
+      ...team,
+      team_progress: { ...db, ...mergeProgress(db, liveStats.get(team.id)) },
+    }
+  })
 }
 
 export async function getRankings() {
   const supabase = createAdminClient()
 
-  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, { data: finishedFixtures }] = await Promise.all([
+  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, liveStats] = await Promise.all([
     supabase
       .from('players')
       .select('id, name, access_token')
@@ -157,16 +179,11 @@ export async function getRankings() {
           team_progress ( group_wins, group_draws, stage_reached, is_champion )
         )
       `),
-    supabase
-      .from('fixtures')
-      .select('stage, home_team_id, away_team_id, home_score, away_score')
-      .eq('status', 'FINISHED'),
+    fetchLiveStats(),
   ])
 
   if (pErr || !players) throw pErr ?? new Error('Could not fetch players')
   if (ptErr) throw ptErr
-
-  const liveStats = computeTeamStatsFromFixtures((finishedFixtures ?? []) as FixtureRow[])
 
   const ranked = players.map(player => {
     const myTeams = (playerTeams ?? []).filter(pt => pt.player_id === player.id)
@@ -177,13 +194,10 @@ export async function getRankings() {
       const dbProgress = team?.team_progress ?? {
         group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false,
       }
-      const live = liveStats.get(team.id)
+      const merged = mergeProgress(dbProgress, liveStats.get(team.id))
       const progress = {
         team_id: team.id as string,
-        group_wins: live?.group_wins ?? dbProgress.group_wins,
-        group_draws: live?.group_draws ?? dbProgress.group_draws,
-        stage_reached: (live && live.stage_reached !== 'group_stage' ? live.stage_reached : dbProgress.stage_reached) as StageReached,
-        is_champion: live?.is_champion ?? dbProgress.is_champion,
+        ...merged,
         updated_at: dbProgress.updated_at ?? '',
       }
       const breakdown = getScoreBreakdown(progress, pt.pot)

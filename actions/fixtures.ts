@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getScoreBreakdown } from '@/lib/scoring'
+import { getScoreBreakdown, mergeProgress } from '@/lib/scoring'
+import { fetchLiveStats } from '@/actions/results'
 import type { Fixture, StageReached } from '@/lib/types'
 
 const FIXTURE_SELECT = `
@@ -51,7 +52,7 @@ export async function getFixtureOwnership(
   const supabase = createAdminClient()
   const teamIds = [homeTeamId, awayTeamId].filter(Boolean) as string[]
 
-  const [{ data: players }, { data: playerTeams }] = await Promise.all([
+  const [{ data: players }, { data: playerTeams }, liveStats] = await Promise.all([
     supabase.from('players').select('id, name').order('name'),
     teamIds.length > 0
       ? supabase
@@ -64,6 +65,7 @@ export async function getFixtureOwnership(
           `)
           .in('team_id', teamIds)
       : Promise.resolve({ data: [] }),
+    fetchLiveStats(),
   ])
 
   return (players ?? []).map(player => {
@@ -72,12 +74,13 @@ export async function getFixtureOwnership(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const team = pt.teams as any
-    const progress = team?.team_progress ?? {
+    const dbProgress = team?.team_progress ?? {
       group_wins: 0,
       group_draws: 0,
       stage_reached: 'group_stage' as StageReached,
       is_champion: false,
     }
+    const progress = mergeProgress(dbProgress, liveStats.get(team.id))
     const breakdown = getScoreBreakdown(progress, pt.pot)
     return {
       player,
