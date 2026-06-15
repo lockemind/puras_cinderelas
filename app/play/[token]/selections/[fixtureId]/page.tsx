@@ -50,11 +50,13 @@ export default async function FixtureDetailPage({
 
   const myTeamIds = new Set(
     (myTeams ?? [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map(pt => (pt.teams as any)?.id as string)
       .filter(Boolean),
   )
   const myTeamPots = new Map<string, number>(
     (myTeams ?? [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map(pt => [(pt.teams as any)?.id as string, pt.pot] as [string, number])
       .filter(([id]) => Boolean(id)),
   )
