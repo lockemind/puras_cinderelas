@@ -164,6 +164,7 @@ export default async function JogosPage({
                   ? ` ${f.home_score ?? 0}–${f.away_score ?? 0} `
                   : ' vs '}
                 {f.away_team?.name ?? '—'}
+                {' '}{f.away_team?.flag_emoji ?? '🏳️'}
               </span>
               {f.status === 'FINISHED' ? (
                 <span className="text-[11px] font-semibold text-[oklch(0.45_0.01_265)]">FT</span>
