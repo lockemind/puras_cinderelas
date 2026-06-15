@@ -1,5 +1,6 @@
 'use server'
 
+import { cache } from 'react'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -28,7 +29,7 @@ export async function getAllPlayers() {
   return data
 }
 
-export async function getPlayerByToken(token: string) {
+async function _getPlayerByToken(token: string) {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('players')
@@ -39,3 +40,5 @@ export async function getPlayerByToken(token: string) {
   if (error) return null
   return data
 }
+
+export const getPlayerByToken = cache(_getPlayerByToken)
