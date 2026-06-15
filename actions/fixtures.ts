@@ -91,6 +91,89 @@ export async function getFixtureOwnership(
   })
 }
 
+export type TeamOwnerCard = {
+  team: { id: string; name: string; flag_emoji: string; mascot: string | null }
+  totalPoints: number
+  owners: Array<{ playerId: string; playerName: string; isCurrentPlayer: boolean }>
+}
+
+export type DuelOwnership = {
+  home: TeamOwnerCard | null
+  away: TeamOwnerCard | null
+}
+
+export async function getFixtureOwnershipByTeam(
+  homeTeamId: string | null,
+  awayTeamId: string | null,
+  currentPlayerId: string,
+): Promise<DuelOwnership> {
+  const supabase = createAdminClient()
+  const teamIds = [homeTeamId, awayTeamId].filter(Boolean) as string[]
+
+  if (teamIds.length === 0) return { home: null, away: null }
+
+  const [{ data: playerTeams }, { data: teams }, liveStats] = await Promise.all([
+    supabase
+      .from('player_teams')
+      .select(`
+        player_id, pot, team_id,
+        players ( id, name ),
+        teams ( id, name, flag_emoji, mascot,
+          team_progress ( group_wins, group_draws, stage_reached, is_champion )
+        )
+      `)
+      .in('team_id', teamIds),
+    supabase
+      .from('teams')
+      .select('id, name, flag_emoji, mascot')
+      .in('id', teamIds),
+    fetchLiveStats(),
+  ])
+
+  function buildCard(teamId: string | null): TeamOwnerCard | null {
+    if (!teamId) return null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const teamRow = (teams ?? []).find((t: any) => t.id === teamId) as any
+    if (!teamRow) return null
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entries = (playerTeams ?? []).filter((pt: any) => pt.team_id === teamId)
+
+    let totalPoints = 0
+    const owners: TeamOwnerCard['owners'] = []
+    for (const pt of entries) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const team = (pt as any).teams as any
+      const dbProgress = team?.team_progress ?? {
+        group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false,
+      }
+      const merged = mergeProgress(dbProgress, liveStats.get(teamId))
+      const breakdown = getScoreBreakdown({ team_id: teamId, ...merged, updated_at: '' }, pt.pot)
+      totalPoints = breakdown.total
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const player = (pt as any).players as any
+      if (player) {
+        owners.push({
+          playerId: player.id,
+          playerName: player.name,
+          isCurrentPlayer: player.id === currentPlayerId,
+        })
+      }
+    }
+
+    return {
+      team: { id: teamRow.id, name: teamRow.name, flag_emoji: teamRow.flag_emoji, mascot: teamRow.mascot },
+      totalPoints,
+      owners,
+    }
+  }
+
+  return {
+    home: buildCard(homeTeamId),
+    away: buildCard(awayTeamId),
+  }
+}
+
 export async function triggerFixturesSync() {
   const syncSecret = process.env.SYNC_SECRET
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
