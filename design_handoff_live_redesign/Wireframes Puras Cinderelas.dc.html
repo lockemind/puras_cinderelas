@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #f1ede3; }
+  </style>
+</helmet>
+
+<div style="font-family: 'Patrick Hand', cursive; color: #2b2b2b; padding: 48px 32px 80px; display: flex; flex-direction: column; gap: 56px; align-items: center;">
+
+  <!-- ============ HEADER ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-family: 'Caveat', cursive; font-size: 44px; font-weight: 700; line-height: 1;">Puras Cinderelas — wireframes de melhoria</div>
+    <div style="font-size: 17px; max-width: 720px; color: #555;">3 direções para os 3 ecrãs principais, otimizadas para a fase live do torneio (check-ins diários, mobile-only). Estrutura primeiro, estilo depois — tudo discutível.</div>
+    <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 240px; border: 2px solid #2b2b2b; border-radius: 14px 8px 12px 9px; background: #fffdf8; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700;">A · Noite Polida</div>
+        <div style="font-size: 14px; color: #555;">O tema atual (noite + dourado) com hierarquia a sério: heróis de pontuação, pódio, deltas de posição. Evolução, não revolução.</div>
+      </div>
+      <div style="flex: 1; min-width: 240px; border: 2px solid #2b2b2b; border-radius: 9px 13px 8px 14px; background: #fffdf8; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700;">B · Transmissão</div>
+        <div style="font-size: 14px; color: #555;">Grafismo de TV desportiva: destaque ao líder, coluna GAP, "hoje em campo", contagem decrescente. A drama-metric é a distância ao 1º.</div>
+      </div>
+      <div style="flex: 1; min-width: 240px; border: 2px solid #2b2b2b; border-radius: 12px 9px 14px 8px; background: #fffdf8; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700;">C · Carnaval das Mascotes</div>
+        <div style="font-size: 14px; color: #555;">As mascotes são a alma do jogo: avatar do jogador = mascote do pote 1, jogos como duelos de mascotes, feed de drama.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MASCOT PROBLEM PANEL ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: 'Caveat', cursive; font-size: 32px; font-weight: 700;">0 · O fundo preto das mascotes</div>
+      <div style="font-size: 15px; color: #777;">3 tratamentos possíveis — define qual a direção que cada um desbloqueia</div>
+    </div>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+      <!-- Treatment 1: blend -->
+      <div style="flex: 1; min-width: 260px; border: 2px solid #2b2b2b; border-radius: 13px 9px 12px 10px; background: #fffdf8; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 16px; font-weight: bold;">1 · Fundir no escuro <span style="background: #f7dc85; padding: 0 6px; border-radius: 4px; font-size: 13px;">custo zero</span></div>
+        <div style="background: #2e2e35; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 5px, #4a4a52 5px 10px); box-shadow: 0 0 18px 14px #2e2e35; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 9px; color: #999;">mascote</div>
+          <div style="color: #ddd; font-size: 14px;">cartão escuro<br><span style="color: #888; font-size: 12px;">o preto desaparece</span></div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c;">máscara radial-gradient → a borda funde com o cartão. Funciona já hoje nas direções A e B.</div>
+      </div>
+      <!-- Treatment 2: ring crop -->
+      <div style="flex: 1; min-width: 260px; border: 2px solid #2b2b2b; border-radius: 10px 12px 9px 13px; background: #fffdf8; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 16px; font-weight: bold;">2 · Recorte circular <span style="background: #f7dc85; padding: 0 6px; border-radius: 4px; font-size: 13px;">só CSS</span></div>
+        <div style="background: #fffdf8; border: 1.5px dashed #aaa; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #d4a93c; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 9px; color: #aaa;">mascote</div>
+          <div style="font-size: 14px;">qualquer fundo<br><span style="color: #888; font-size: 12px;">o preto vira vinheta</span></div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c;">círculo + anel dourado → o fundo preto torna-se moldura intencional. Desbloqueia avatares na direção C.</div>
+      </div>
+      <!-- Treatment 3: regenerate -->
+      <div style="flex: 1; min-width: 260px; border: 2px solid #2b2b2b; border-radius: 12px 10px 13px 9px; background: #fffdf8; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 16px; font-weight: bold;">3 · Remover o fundo <span style="background: #eee; padding: 0 6px; border-radius: 4px; font-size: 13px;">pipeline novo</span></div>
+        <div style="background: #fffdf8; border: 1.5px dashed #aaa; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 64px; height: 64px; border-radius: 38% 45% 40% 48%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #fff; box-shadow: 0 0 0 1.5px #bbb; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 9px; color: #aaa;">sticker</div>
+          <div style="font-size: 14px;">silhueta livre<br><span style="color: #888; font-size: 12px;">estilo "cromos"</span></div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c;">rembg/re-gen em batch (já tens pipeline em docs/) → mascotes-sticker, celebrações, máxima liberdade.</div>
+      </div>
+    </div>
+    <div style="font-size: 15px; background: #f7dc85; align-self: flex-start; padding: 6px 14px; border-radius: 8px 5px 9px 6px; transform: rotate(-0.5deg);">veredicto: nada bloqueia — A e B funcionam já; C precisa do tratamento 2; o 3 é nice-to-have.</div>
+  </div>
+
+  <!-- ============ SECTION 1: CLASSIFICACAO ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 18px;" data-screen-label="Classificação">
+    <div style="display: flex; align-items: baseline; gap: 12px; border-bottom: 2px dashed #c8c0ad; padding-bottom: 8px;">
+      <div style="font-family: 'Caveat', cursive; font-size: 34px; font-weight: 700;">1 · Classificação</div>
+      <div style="font-size: 15px; color: #777;">o ecrã do check-in diário — "subi ou desci?"</div>
+    </div>
+    <div style="display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
+
+      <!-- 1A -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">A · pódio + deltas</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 22px 18px 20px 19px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(-0.4deg);">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+            <span style="font-weight: bold; letter-spacing: 1px;">CLASSIFICAÇÃO</span>
+            <span style="color: #888; font-size: 12px;">↻ há 12 min</span>
+          </div>
+          <!-- podium -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: end;">
+            <div style="border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px;">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <div style="font-size: 12px;">Rita</div>
+              <div style="font-size: 14px; font-weight: bold;">78</div>
+              <div style="font-size: 11px; color: #888;">2º</div>
+            </div>
+            <div style="border: 2px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 12px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; background: #f7dc85;">
+              <div style="font-size: 13px;">♛</div>
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #b0742c;"></div>
+              <div style="font-size: 13px; font-weight: bold;">Miguel</div>
+              <div style="font-size: 16px; font-weight: bold;">84</div>
+              <div style="font-size: 11px; color: #7a5b1d;">1º</div>
+            </div>
+            <div style="border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 6px 4px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <div style="font-size: 12px;">Rui</div>
+              <div style="font-size: 14px; font-weight: bold;">71</div>
+              <div style="font-size: 11px; color: #888;">3º</div>
+            </div>
+          </div>
+          <!-- rows -->
+          <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 7px 5px 8px 6px; padding: 5px 8px;">
+              <span style="width: 16px; color: #888;">4</span><span style="flex: 1;">Pedro</span><span style="color: #3a7d44; font-size: 12px;">▲1</span><span style="font-weight: bold;">66</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 6px 8px 5px 7px; padding: 5px 8px;">
+              <span style="width: 16px; color: #888;">5</span><span style="flex: 1;">Ana</span><span style="color: #c0392b; font-size: 12px;">▼2</span><span style="font-weight: bold;">64</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 2.5px solid #b0742c; border-radius: 7px 6px 8px 5px; padding: 6px 8px; background: #fdf3d7; transform: rotate(-0.5deg);">
+              <span style="width: 16px; font-weight: bold;">6</span><span style="flex: 1; font-weight: bold;">João (tu)</span><span style="color: #3a7d44; font-size: 12px;">▲2</span><span style="font-weight: bold;">61</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 5px 8px;">
+              <span style="width: 16px; color: #888;">7</span><span style="flex: 1;">Carla</span><span style="color: #888; font-size: 12px;">—</span><span style="font-weight: bold;">59</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px; justify-content: center; color: #aaa; font-size: 12px;">⋮ &nbsp;8–12</div>
+          </div>
+          <!-- tab bar -->
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ deltas ▲▼ desde ontem = a razão do check-in diário<br>→ a tua linha destacada e sempre visível (sticky)<br>→ pódio dá estatuto aos 3 primeiros (prémios!)</div>
+      </div>
+
+      <!-- 1B -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">B · líder + coluna GAP</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 19px 21px 18px 22px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(0.3deg);">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+            <span style="font-weight: bold; letter-spacing: 1px;">CLASSIFICAÇÃO</span>
+            <span style="background: #c0392b; color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 8px;">● LIVE</span>
+          </div>
+          <!-- leader spotlight -->
+          <div style="background: #2e2e35; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; color: #eee;">
+            <div style="font-size: 10px; letter-spacing: 2px; color: #d4a93c;">LÍDER</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 4px, #4a4a52 4px 8px); box-shadow: 0 0 10px 7px #2e2e35;"></div>
+              <div style="flex: 1; font-size: 15px; font-weight: bold;">Miguel</div>
+              <div style="font-size: 24px; font-weight: bold; color: #f0c75e;">84</div>
+            </div>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 3px, #4a4a52 3px 6px);"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 3px, #4a4a52 3px 6px);"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 3px, #4a4a52 3px 6px);"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 3px, #4a4a52 3px 6px);"></div>
+              <div style="font-size: 11px; color: #999; margin-left: 4px;">+9 hoje</div>
+            </div>
+          </div>
+          <!-- table -->
+          <div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px;">
+            <div style="display: flex; gap: 8px; font-size: 10px; color: #999; letter-spacing: 1px; padding: 0 8px;">
+              <span style="width: 14px;">#</span><span style="flex: 1;">JOGADOR</span><span style="width: 30px; text-align: right;">PTS</span><span style="width: 32px; text-align: right;">GAP</span>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 4px 8px; border-bottom: 1px dashed #ccc;">
+              <span style="width: 14px; color: #888;">2</span><span style="flex: 1;">Rita</span><span style="width: 30px; text-align: right; font-weight: bold;">78</span><span style="width: 32px; text-align: right; color: #c0392b;">-6</span>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 4px 8px; border-bottom: 1px dashed #ccc;">
+              <span style="width: 14px; color: #888;">3</span><span style="flex: 1;">Rui</span><span style="width: 30px; text-align: right; font-weight: bold;">71</span><span style="width: 32px; text-align: right; color: #c0392b;">-13</span>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 4px 8px; border-bottom: 1px dashed #ccc;">
+              <span style="width: 14px; color: #888;">4</span><span style="flex: 1;">Pedro</span><span style="width: 30px; text-align: right; font-weight: bold;">66</span><span style="width: 32px; text-align: right; color: #c0392b;">-18</span>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 5px 8px; background: #fdf3d7; border: 2px solid #b0742c; border-radius: 6px;">
+              <span style="width: 14px; font-weight: bold;">6</span><span style="flex: 1; font-weight: bold;">João (tu)</span><span style="width: 30px; text-align: right; font-weight: bold;">61</span><span style="width: 32px; text-align: right; color: #c0392b; font-weight: bold;">-23</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 12px;">⋮</div>
+          </div>
+          <div style="font-size: 11px; color: #888; text-align: center; border: 1.5px dashed #bbb; border-radius: 6px; padding: 3px;">próxima sincronização em ~18 min</div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ GAP ao líder = a métrica de drama ("estou a -23!")<br>→ spotlight escuro: as mascotes de fundo preto fundem na perfeição<br>→ "+9 hoje" mostra movimento sem histórico</div>
+      </div>
+
+      <!-- 1C -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">C · mascotes + drama</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 21px 19px 22px 18px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(-0.3deg);">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+            <span style="font-weight: bold; letter-spacing: 1px;">CLASSIFICAÇÃO</span>
+            <span style="color: #888; font-size: 12px;">↻ há 12 min</span>
+          </div>
+          <!-- drama feed -->
+          <div style="background: #fdf3d7; border: 2px solid #b0742c; border-radius: 9px 7px 8px 9px; padding: 8px 10px; font-size: 13px; transform: rotate(0.4deg);">
+            ✨ <b>ontem à noite:</b> o Rui ultrapassou o Pedro — a Noruega venceu e valeu bónus cinderela!
+          </div>
+          <!-- rows with mascot avatars -->
+          <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 7px 5px 8px 6px; padding: 4px 8px;">
+              <div style="position: relative; width: 30px; height: 30px;">
+                <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+                <div style="position: absolute; top: -10px; left: 6px; font-size: 12px;">♛</div>
+              </div>
+              <span style="flex: 1;"><b>Miguel</b></span><span style="font-weight: bold;">84</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 6px 8px 5px 7px; padding: 4px 8px;">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <span style="flex: 1;">Rita</span><span style="font-weight: bold;">78</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 5px; padding: 4px 8px;">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <span style="flex: 1;">Rui</span><span style="color: #3a7d44; font-size: 12px;">▲1</span><span style="font-weight: bold;">71</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 7px 6px 8px 5px; padding: 4px 8px;">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <span style="flex: 1;">Pedro</span><span style="color: #c0392b; font-size: 12px;">▼1</span><span style="font-weight: bold;">66</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 2.5px solid #b0742c; border-radius: 6px 8px 7px 5px; padding: 5px 8px; background: #fdf3d7;">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #b0742c;"></div>
+              <span style="flex: 1; font-weight: bold;">João <span style="background: #b0742c; color: #fff; font-size: 10px; padding: 0 5px; border-radius: 6px;">TU</span></span><span style="font-weight: bold;">61</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 12px;">⋮ &nbsp;7–12</div>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ avatar do jogador = mascote do seu pote 1 (recorte circular)<br>→ feed de drama gerado por regras (ultrapassagens, bónus)<br>→ coroa no líder; identidade visual por jogador</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION 2: EQUIPA ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 18px;" data-screen-label="Equipa">
+    <div style="display: flex; align-items: baseline; gap: 12px; border-bottom: 2px dashed #c8c0ad; padding-bottom: 8px;">
+      <div style="font-family: 'Caveat', cursive; font-size: 34px; font-weight: 700;">2 · Equipa</div>
+      <div style="font-size: 15px; color: #777;">"como estão as minhas 4 equipas?" — hoje é só uma lista plana</div>
+    </div>
+    <div style="display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
+
+      <!-- 2A -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">A · herói de pontos + cartões</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 20px 18px 22px 19px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(0.3deg);">
+          <!-- score hero -->
+          <div style="text-align: center; display: flex; flex-direction: column; gap: 2px; padding: 6px 0;">
+            <div style="font-size: 11px; letter-spacing: 2px; color: #888;">OS MEUS PONTOS</div>
+            <div style="font-size: 44px; font-weight: bold; line-height: 1;">61</div>
+            <div style="display: flex; gap: 6px; justify-content: center; font-size: 12px;">
+              <span style="background: #f7dc85; padding: 0 8px; border-radius: 8px;">6º lugar</span>
+              <span style="color: #3a7d44;">+6 hoje</span>
+            </div>
+          </div>
+          <!-- team cards -->
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 6px 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <div style="flex: 1;"><b>Brasil</b><br><span style="font-size: 11px; color: #888;">Pote 1 · 1/8 de Final</span></div>
+              <span style="font-weight: bold;">24</span><span style="color: #999; font-size: 11px;">▾</span>
+            </div>
+            <!-- expanded card -->
+            <div style="border: 2px solid #b0742c; border-radius: 7px 8px 6px 9px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #fdf3d7;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #b0742c;"></div>
+                <div style="flex: 1;"><b>Noruega</b><br><span style="font-size: 11px; color: #888;">Pote 3 · Quartos de Final</span></div>
+                <span style="font-weight: bold;">28</span><span style="color: #999; font-size: 11px;">▴</span>
+              </div>
+              <div style="padding: 6px 10px; display: flex; flex-direction: column; gap: 3px; font-size: 12px; border-top: 1.5px dashed #b0742c;">
+                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">Grupos (2V 1E)</span><span>+7</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">1/16 + 1/8</span><span>+13</span></div>
+                <div style="display: flex; justify-content: space-between; background: #f7dc85; margin: 0 -4px; padding: 1px 4px; border-radius: 4px;"><span>✨ Bónus cinderela ×2</span><span><b>+10</b></span></div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 6px 8px 7px 5px; padding: 6px 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <div style="flex: 1;"><b>Marrocos</b><br><span style="font-size: 11px; color: #888;">Pote 2 · 1/8 de Final</span></div>
+              <span style="font-weight: bold;">9</span><span style="color: #999; font-size: 11px;">▾</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; border: 1.5px solid #2b2b2b; border-radius: 8px 5px 6px 8px; padding: 6px 8px; opacity: 0.55;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #999;"></div>
+              <div style="flex: 1;"><b style="text-decoration: line-through;">Cabo Verde</b><br><span style="font-size: 11px; color: #888;">Pote 4 · eliminado nos grupos</span></div>
+              <span style="font-weight: bold;">0</span>
+            </div>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center;">
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ total + lugar no topo: a resposta nº1 sem scroll<br>→ eliminados desvanecem (mas ficam — é a história)<br>→ bónus cinderela com destaque dourado ✨</div>
+      </div>
+
+      <!-- 2B -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">B · tracker de fases</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 18px 22px 19px 21px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(-0.35deg);">
+          <!-- scoreboard strip -->
+          <div style="background: #2e2e35; border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #eee;">
+            <div style="text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #f0c75e;">61</div><div style="font-size: 9px; letter-spacing: 1px; color: #999;">PONTOS</div></div>
+            <div style="text-align: center;"><div style="font-size: 20px; font-weight: bold;">6º</div><div style="font-size: 9px; letter-spacing: 1px; color: #999;">LUGAR</div></div>
+            <div style="text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #7fc97f;">+6</div><div style="font-size: 9px; letter-spacing: 1px; color: #999;">HOJE</div></div>
+          </div>
+          <!-- team rows with stage tracker -->
+          <div style="display: flex; flex-direction: column; gap: 7px; font-size: 13px;">
+            <div style="border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 8px; padding: 7px 9px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+                <b style="flex: 1;">Brasil</b><span style="font-weight: bold;">24 pts</span>
+              </div>
+              <div style="display: flex; gap: 3px; align-items: center;">
+                <div style="flex: 1; height: 8px; background: #2b2b2b; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; background: #2b2b2b; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; background: #f7dc85; border: 1.5px solid #b0742c; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; border: 1.5px dashed #bbb; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; border: 1.5px dashed #bbb; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; border: 1.5px dashed #bbb; border-radius: 3px;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 8px; color: #999; letter-spacing: 0.5px;"><span>GRUPOS</span><span>16</span><span>8</span><span>QF</span><span>MF</span><span>FINAL</span></div>
+            </div>
+            <div style="border: 2px solid #b0742c; background: #fdf3d7; border-radius: 7px 8px 6px 9px; padding: 7px 9px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #b0742c;"></div>
+                <b style="flex: 1;">Noruega ✨</b><span style="font-weight: bold;">28 pts</span>
+              </div>
+              <div style="display: flex; gap: 3px; align-items: center;">
+                <div style="flex: 1; height: 8px; background: #2b2b2b; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; background: #2b2b2b; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; background: #2b2b2b; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; background: #f7dc85; border: 1.5px solid #b0742c; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; border: 1.5px dashed #bbb; border-radius: 3px;"></div>
+                <div style="flex: 1; height: 8px; border: 1.5px dashed #bbb; border-radius: 3px;"></div>
+              </div>
+              <div style="font-size: 11px; color: #7a5b1d;">⚡ joga hoje às 20:00 — QF vale +12 (+10 bónus)</div>
+            </div>
+            <div style="border: 1.5px solid #2b2b2b; border-radius: 6px 8px 7px 5px; padding: 7px 9px; display: flex; align-items: center; gap: 7px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+              <b style="flex: 1;">Marrocos</b><span style="font-weight: bold;">9 pts</span>
+            </div>
+            <div style="border: 1.5px solid #2b2b2b; border-radius: 8px 5px 6px 8px; padding: 7px 9px; display: flex; align-items: center; gap: 7px; opacity: 0.55;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #999;"></div>
+              <b style="flex: 1; text-decoration: line-through;">Cabo Verde</b><span style="font-weight: bold;">0 pts</span>
+            </div>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center;">
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ tracker de fases: vê-se logo até onde cada equipa chegou<br>→ "joga hoje + o que vale" liga a equipa aos jogos<br>→ strip estilo marcador de TV no topo</div>
+      </div>
+
+      <!-- 2C -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">C · plantel de mascotes</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 22px 19px 18px 21px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(0.4deg);">
+          <div style="font-size: 11px; letter-spacing: 2px; color: #888; text-align: center;">O MEU PLANTEL · 61 PTS</div>
+          <!-- mascot lineup -->
+          <div style="display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 8px 0 0;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #d4a93c;"></div>
+              <span style="font-size: 11px;">Brasil</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; transform: translateY(-8px);">
+              <div style="font-size: 12px;">✨</div>
+              <div style="width: 62px; height: 62px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #b0742c; box-shadow: 0 0 0 3px #f7dc85;"></div>
+              <span style="font-size: 11px; font-weight: bold;">Noruega</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #d4a93c;"></div>
+              <span style="font-size: 11px;">Marrocos</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; opacity: 0.5;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #999; filter: grayscale(1);"></div>
+              <span style="font-size: 11px;">C. Verde</span>
+            </div>
+          </div>
+          <div style="height: 6px; background: #2b2b2b; border-radius: 50% / 100%; opacity: 0.15; margin: -2px 20px 0;"></div>
+          <div style="font-size: 10px; color: #999; text-align: center;">↑ toca numa mascote — a selecionada cresce</div>
+          <!-- selected detail -->
+          <div style="border: 2px solid #b0742c; border-radius: 9px 7px 8px 9px; background: #fdf3d7; padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <b>Noruega · Pote 3</b><span style="font-weight: bold; font-size: 16px;">28 pts</span>
+            </div>
+            <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #7a5b1d;">"a tua cinderela ainda dança!" — nos quartos, +10 de bónus já no bolso ✨</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888;"><span>Grupos +7 · Mata-mata +13 · Bónus +10</span><span style="color: #2b2b2b;">▸ detalhe</span></div>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center; margin-top: auto;">
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; color: #999;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ o plantel como "foto de equipa" — eliminados a cinzento<br>→ copy com drama ("ainda dança!") gerada por regras<br>→ precisa do recorte circular (tratamento 2)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SECTION 3: JOGOS ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 18px;" data-screen-label="Jogos">
+    <div style="display: flex; align-items: baseline; gap: 12px; border-bottom: 2px dashed #c8c0ad; padding-bottom: 8px;">
+      <div style="font-family: 'Caveat', cursive; font-size: 34px; font-weight: 700;">3 · Jogos</div>
+      <div style="font-size: 15px; color: #777;">hoje é uma lista infinita — falta responder "o que me interessa HOJE?"</div>
+    </div>
+    <div style="display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
+
+      <!-- 3A -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">A · seletor de dias</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 19px 21px 20px 18px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(-0.3deg);">
+          <!-- date chips -->
+          <div style="display: flex; gap: 5px; align-items: center; font-size: 12px;">
+            <span style="color: #bbb;">‹</span>
+            <div style="flex: 1; text-align: center; border: 1.5px solid #ccc; border-radius: 8px; padding: 3px 0; color: #999;">Qui 11</div>
+            <div style="flex: 1; text-align: center; border: 2px solid #2b2b2b; border-radius: 8px; padding: 3px 0; background: #f7dc85; font-weight: bold;">Sex 12</div>
+            <div style="flex: 1; text-align: center; border: 1.5px solid #ccc; border-radius: 8px; padding: 3px 0; color: #999;">Sáb 13</div>
+            <span style="color: #bbb;">›</span>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 1px; color: #888;">SEXTA, 12 DE JUNHO · 4 JOGOS</div>
+          <!-- match rows -->
+          <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 6px; border: 1.5px solid #2b2b2b; border-radius: 7px 5px 8px 6px; padding: 6px 8px;">
+              <span>🇧🇷</span><span style="flex: 1;">Brasil</span><span style="font-weight: bold; font-family: monospace;">2–0</span><span style="flex: 1; text-align: right;">Egito</span><span>🇪🇬</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; border: 2px solid #c0392b; border-radius: 6px 8px 5px 7px; padding: 6px 8px; background: #fdf0ee;">
+              <span>🇲🇦</span><span style="flex: 1;"><b>Marrocos</b></span><span style="color: #c0392b; font-size: 10px; font-weight: bold;">● 67'</span><span style="flex: 1; text-align: right;">Japão</span><span>🇯🇵</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; border: 2.5px solid #b0742c; border-radius: 8px 6px 7px 5px; padding: 6px 8px; background: #fdf3d7; transform: rotate(-0.4deg);">
+              <span>🇳🇴</span><span style="flex: 1;"><b>Noruega</b> <span style="font-size: 9px; background: #b0742c; color: #fff; padding: 0 4px; border-radius: 5px;">MINHA</span></span><span style="font-family: monospace;">20:00</span><span style="flex: 1; text-align: right;">Colômbia</span><span>🇨🇴</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; border: 1.5px solid #2b2b2b; border-radius: 7px 8px 6px 5px; padding: 6px 8px;">
+              <span>🇪🇸</span><span style="flex: 1;">Espanha</span><span style="font-family: monospace;">23:00</span><span style="flex: 1; text-align: right;">Escócia</span><span>🏴</span>
+            </div>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 1px; color: #888;">SÁBADO, 13 DE JUNHO</div>
+          <div style="display: flex; align-items: center; gap: 6px; border: 1.5px dashed #bbb; border-radius: 7px; padding: 6px 8px; font-size: 12px; color: #999;">
+            <span>🇫🇷</span><span style="flex: 1;">França</span><span style="font-family: monospace;">17:00</span><span style="flex: 1; text-align: right;">Noruega</span><span>🇳🇴</span>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center; margin-top: auto;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ chips de dias com "hoje" pré-selecionado — fim do scroll infinito<br>→ os meus jogos saltam à vista (marcador MINHA)<br>→ live = vermelho com minuto do jogo</div>
+      </div>
+
+      <!-- 3B -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">B · "hoje" em primeiro</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 21px 18px 19px 22px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(0.35deg);">
+          <!-- today hero -->
+          <div style="background: #2e2e35; border-radius: 10px; padding: 12px; color: #eee; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 10px; letter-spacing: 2px; color: #d4a93c;">O TEU PRÓXIMO JOGO</div>
+            <div style="display: flex; align-items: center; justify-content: space-around;">
+              <div style="text-align: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 4px, #4a4a52 4px 8px); box-shadow: 0 0 10px 7px #2e2e35; margin: 0 auto;"></div>
+                <div style="font-size: 12px; margin-top: 3px;">Noruega</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 11px; color: #999;">começa em</div>
+                <div style="font-size: 20px; font-weight: bold; color: #f0c75e;">2h 14m</div>
+                <div style="font-size: 10px; color: #999;">QF · 20:00</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: repeating-linear-gradient(45deg, #3a3a42 0 4px, #4a4a52 4px 8px); box-shadow: 0 0 10px 7px #2e2e35; margin: 0 auto;"></div>
+                <div style="font-size: 12px; margin-top: 3px;">Colômbia</div>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: #f0c75e; text-align: center; border-top: 1px dashed #555; padding-top: 6px;">vitória vale +12 e +10 de bónus cinderela ✨</div>
+          </div>
+          <!-- my games -->
+          <div style="font-size: 11px; letter-spacing: 1px; color: #888;">EM CAMPO HOJE · 2 EQUIPAS TUAS</div>
+          <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 6px; border: 2px solid #c0392b; border-radius: 7px 5px 8px 6px; padding: 6px 8px; background: #fdf0ee;">
+              <span>🇲🇦</span><span style="flex: 1;"><b>Marrocos</b> 1–1 Japão</span><span style="color: #c0392b; font-size: 10px; font-weight: bold;">● 67'</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; border: 2px solid #b0742c; border-radius: 6px 8px 5px 7px; padding: 6px 8px; background: #fdf3d7;">
+              <span>🇳🇴</span><span style="flex: 1;"><b>Noruega</b> vs Colômbia</span><span style="font-family: monospace;">20:00</span>
+            </div>
+          </div>
+          <!-- other games -->
+          <div style="font-size: 11px; letter-spacing: 1px; color: #888;">OUTROS JOGOS</div>
+          <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #777;">
+            <div style="display: flex; gap: 6px; padding: 3px 8px; border-bottom: 1px dashed #ddd;"><span style="flex: 1;">Brasil 2–0 Egito</span><span style="font-family: monospace; color: #999;">FT</span></div>
+            <div style="display: flex; gap: 6px; padding: 3px 8px; border-bottom: 1px dashed #ddd;"><span style="flex: 1;">Espanha vs Escócia</span><span style="font-family: monospace; color: #999;">23:00</span></div>
+            <div style="text-align: center; color: #aaa; font-size: 11px;">ver calendário completo ▾</div>
+          </div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center; margin-top: auto;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ ordena por relevância: o MEU próximo jogo primeiro<br>→ "o que vale" (pts + bónus) cria antecipação<br>→ calendário completo fica a um toque, não à frente</div>
+      </div>
+
+      <!-- 3C -->
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 312px;">
+        <div style="font-family: 'Caveat', cursive; font-size: 23px; font-weight: 700;">C · duelos de mascotes</div>
+        <div style="width: 300px; background: #fffdf8; border: 2.5px solid #2b2b2b; border-radius: 18px 20px 22px 19px; box-shadow: 5px 5px 0 rgba(43,43,43,0.12); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px; transform: rotate(-0.4deg);">
+          <div style="font-size: 11px; letter-spacing: 1px; color: #888;">HOJE · SEXTA 12</div>
+          <!-- big face-off card -->
+          <div style="border: 2.5px solid #b0742c; border-radius: 10px 8px 9px 11px; background: #fdf3d7; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-around;">
+              <div style="text-align: center;">
+                <div style="width: 58px; height: 58px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #b0742c; margin: 0 auto;"></div>
+                <div style="font-size: 12px; font-weight: bold; margin-top: 3px;">Noruega</div>
+              </div>
+              <div style="font-family: 'Caveat', cursive; font-size: 26px; font-weight: 700; color: #b0742c;">vs</div>
+              <div style="text-align: center;">
+                <div style="width: 58px; height: 58px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 5px, #454545 5px 10px); border: 3px solid #999; margin: 0 auto;"></div>
+                <div style="font-size: 12px; margin-top: 3px;">Colômbia</div>
+              </div>
+            </div>
+            <div style="text-align: center; font-size: 12px;">20:00 · Quartos de Final</div>
+            <div style="font-family: 'Caveat', cursive; font-size: 16px; color: #7a5b1d; text-align: center;">o duelo da tua cinderela — tu e mais 2 jogadores têm a Noruega</div>
+          </div>
+          <!-- finished face-off small -->
+          <div style="border: 1.5px solid #2b2b2b; border-radius: 8px 6px 7px 9px; padding: 8px 10px; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #d4a93c;"></div>
+            <span style="font-size: 12px; flex: 1;"><b>Brasil</b> · Egito</span>
+            <span style="font-family: monospace; font-weight: bold; font-size: 14px; background: #f7dc85; padding: 1px 7px; border-radius: 5px; transform: rotate(-3deg);">2–0</span>
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: repeating-linear-gradient(45deg, #2e2e2e 0 4px, #454545 4px 8px); border: 2px solid #ccc; filter: grayscale(1); opacity: 0.6;"></div>
+          </div>
+          <!-- other rows -->
+          <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #777;">
+            <div style="display: flex; gap: 6px; padding: 3px 8px; border-bottom: 1px dashed #ddd;"><span style="color: #c0392b; font-size: 10px; font-weight: bold;">●</span><span style="flex: 1;">Marrocos 1–1 Japão</span><span style="font-family: monospace;">67'</span></div>
+            <div style="display: flex; gap: 6px; padding: 3px 8px; border-bottom: 1px dashed #ddd;"><span style="width: 10px;"></span><span style="flex: 1;">Espanha vs Escócia</span><span style="font-family: monospace;">23:00</span></div>
+          </div>
+          <div style="font-size: 10px; color: #999; text-align: center;">jogos com as tuas equipas = cartão grande com mascotes; o resto = linhas compactas</div>
+          <div style="display: flex; border-top: 1.5px solid #2b2b2b; padding-top: 6px; font-size: 11px; text-align: center; margin-top: auto;">
+            <div style="flex: 1; color: #999;">⚽ Equipa</div>
+            <div style="flex: 1; color: #999;">🏆 Classif.</div>
+            <div style="flex: 1; font-weight: bold; border-top: 3px solid #b0742c; margin-top: -8px; padding-top: 5px;">📅 Jogos</div>
+          </div>
+        </div>
+        <div style="font-family: 'Caveat', cursive; font-size: 17px; color: #b0742c; line-height: 1.3;">→ hierarquia por posse: os teus jogos = duelos grandes<br>→ derrotados ficam a cinzento (pequena crueldade saudável)<br>→ "tu e mais 2 têm a Noruega" puxa para o detalhe do jogo</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ RECOMMENDATION ============ -->
+  <div style="max-width: 1060px; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+    <div style="font-family: 'Caveat', cursive; font-size: 32px; font-weight: 700; border-bottom: 2px dashed #c8c0ad; padding-bottom: 8px;">recomendação</div>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+      <div style="flex: 2; min-width: 340px; border: 2px solid #2b2b2b; border-radius: 13px 9px 12px 10px; background: #fffdf8; padding: 16px 18px; font-size: 15px; line-height: 1.5;">
+        As direções <b>não são exclusivas</b> — a minha sugestão é uma combinação:
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+          <div style="display: flex; gap: 10px;"><span style="background: #f7dc85; padding: 0 8px; border-radius: 6px; height: fit-content;">base</span><span><b>A</b> como estrutura (evolução natural do que existe, menor risco de implementação)</span></div>
+          <div style="display: flex; gap: 10px;"><span style="background: #f7dc85; padding: 0 8px; border-radius: 6px; height: fit-content;">rouba de B</span><span>a coluna <b>GAP</b>, o tracker de fases e o herói "o teu próximo jogo + o que vale"</span></div>
+          <div style="display: flex; gap: 10px;"><span style="background: #f7dc85; padding: 0 8px; border-radius: 6px; height: fit-content;">rouba de C</span><span>avatares-mascote na classificação (recorte circular) e o <b>feed de drama</b></span></div>
+        </div>
+      </div>
+      <div style="flex: 1; min-width: 260px; border: 2px dashed #b0742c; border-radius: 10px 13px 9px 12px; background: #fdf3d7; padding: 16px 18px; font-size: 15px; line-height: 1.5;">
+        <b>próximos passos:</b><br>
+        1 · diz-me quais frames aprovas / misturas<br>
+        2 · faço o mockup hi-fi (tema noite + dourado real, mascotes a sério)<br>
+        3 · pacote de handoff para o Claude Code implementar
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

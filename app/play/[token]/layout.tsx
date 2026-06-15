@@ -1,10 +1,7 @@
-export const dynamic = 'force-dynamic'
-
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getPlayerByToken } from '@/actions/players'
-import { MascotReveal } from '@/components/mascot-reveal'
 import { PlayerNav } from '@/components/player-nav'
 
 export default async function PlayerLayout({
@@ -42,7 +39,7 @@ export default async function PlayerLayout({
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-24">
-        <MascotReveal>{children}</MascotReveal>
+        {children}
       </main>
 
       <PlayerNav tabs={[
