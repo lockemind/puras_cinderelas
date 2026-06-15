@@ -108,9 +108,10 @@ export async function updateTeamProgress(input: UpdateTeamProgressInput) {
 export async function triggerManualSync() {
   const syncSecret = process.env.SYNC_SECRET
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!syncSecret || !supabaseUrl) {
-    throw new Error('Missing SYNC_SECRET or SUPABASE_URL env vars')
+  if (!syncSecret || !supabaseUrl || !anonKey) {
+    throw new Error('Missing SYNC_SECRET, SUPABASE_URL, or SUPABASE_ANON_KEY env vars')
   }
 
   const functionUrl = `${supabaseUrl}/functions/v1/sync-results`
@@ -119,6 +120,7 @@ export async function triggerManualSync() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${anonKey}`,
       'x-sync-secret': syncSecret,
     },
   })
