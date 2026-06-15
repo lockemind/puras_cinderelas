@@ -46,8 +46,7 @@ function TopLabel({ status, utcDate, stageLabel }: Pick<DuelHeroProps, 'status' 
 
   if (status === 'live') {
     return (
-      <span className="absolute top-[11px] left-1/2 -translate-x-1/2 flex items-center gap-[5px]">
-        <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-[pulse_1.2s_ease-in-out_infinite_alternate]" />
+      <span className="absolute top-[11px] left-1/2 -translate-x-1/2">
         <LiveMinute utcDate={utcDate} />
       </span>
     )

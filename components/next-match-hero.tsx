@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { MascotAvatar } from '@/components/mascot-avatar'
-import { useTickingNow, approxMinute } from '@/components/live-minute'
+import { useTickingNow } from '@/components/live-minute'
+import { estimateMatchTiming } from '@/lib/match-timing'
 
 type HeroTeam = { name: string; mascot: string | null; flagEmoji: string }
 
@@ -31,11 +32,13 @@ export function NextMatchHero({
   const diffMin = Math.round((new Date(utcDate).getTime() - now) / 60_000)
   const live = isLive || diffMin <= 0
 
+  const estimate = estimateMatchTiming(utcDate, now)
+
   let centerLabel: string
   let centerValue: string
   if (live) {
-    centerLabel = 'ao vivo'
-    centerValue = approxMinute(utcDate, now)
+    centerLabel = estimate.estimatedPhase === 'HALF_TIME' ? 'intervalo' : 'ao vivo (est.)'
+    centerValue = estimate.displayLabel
   } else {
     centerLabel = 'começa em'
     const h = Math.floor(diffMin / 60)
