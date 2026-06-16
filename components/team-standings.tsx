@@ -46,6 +46,9 @@ export function TeamStandings({ teams }: { teams: Teams }) {
                     <span className="text-muted-foreground text-xs">
                       {STAGE_LABELS[progress.stage_reached] ?? progress.stage_reached}
                     </span>
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                      {team.goalStats.gamesPlayed}({team.goalStats.goalsFor}/{team.goalStats.goalsAgainst})
+                    </span>
                     <span className="text-gold text-xs font-semibold tabular-nums">
                       {breakdown.total} pts
                     </span>
