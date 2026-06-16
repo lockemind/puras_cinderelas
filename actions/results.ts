@@ -142,7 +142,7 @@ export async function triggerManualSync() {
 
 export async function getAllTeamsWithProgress() {
   const supabase = createAdminClient()
-  const [{ data, error }, liveStats] = await Promise.all([
+  const [{ data, error }, finishedFixtures] = await Promise.all([
     supabase
       .from('teams')
       .select(`
@@ -153,10 +153,13 @@ export async function getAllTeamsWithProgress() {
       `)
       .order('pot', { ascending: true })
       .order('name', { ascending: true }),
-    fetchLiveStats(),
+    fetchFinishedFixtureRows(),
   ])
 
   if (error) throw error
+
+  const liveStats = computeTeamStatsFromFixtures(finishedFixtures)
+  const goalStatsByTeam = computeTeamGoalStats(finishedFixtures)
 
   return (data ?? []).map(team => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,6 +169,7 @@ export async function getAllTeamsWithProgress() {
     return {
       ...team,
       team_progress: { ...db, ...mergeProgress(db, liveStats.get(team.id)) },
+      goalStats: goalStatsByTeam.get(team.id) ?? { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 },
     }
   })
 }
@@ -212,11 +216,13 @@ export async function getRankings() {
         updated_at: dbProgress.updated_at ?? '',
       }
       const breakdown = getScoreBreakdown(progress, pt.pot)
+      const teamGoalStats = goalStatsByTeam.get(team.id) ?? { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 }
       return {
         team: { id: team.id, name: team.name, pot: team.pot, flag_emoji: team.flag_emoji, mascot: (team.mascot ?? null) as string | null },
         pot: pt.pot,
         progress,
         breakdown,
+        goalStats: teamGoalStats,
       }
     })
 
