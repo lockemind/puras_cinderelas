@@ -3,6 +3,15 @@
 import { useState } from 'react'
 import { MascotAvatar } from '@/components/mascot-avatar'
 import type { RankingEntryWithDelta } from '@/actions/results'
+import type { GoalStats } from '@/lib/ranking'
+
+function CompactStats({ stats, className }: { stats: GoalStats; className?: string }) {
+  return (
+    <span className={`text-[11px] tabular-nums text-muted-foreground ${className ?? ''}`}>
+      {stats.gamesPlayed}({stats.goalsFor}/{stats.goalsAgainst})
+    </span>
+  )
+}
 
 const STAGE_SHORT: Record<string, string> = {
   group_stage: 'Grupos',
@@ -129,6 +138,7 @@ function PodiumCard({
           {tuBadge}
         </p>
         <p className="text-xl font-extrabold tabular-nums text-gold">{entry.totalScore}</p>
+        <CompactStats stats={{ gamesPlayed: entry.gamesPlayed, goalsFor: entry.goalsFor, goalsAgainst: entry.goalsAgainst }} />
         <p className="text-[11px] font-semibold text-gold">1º</p>
       </button>
     )
@@ -153,6 +163,7 @@ function PodiumCard({
         {tuBadge}
       </p>
       <p className="text-base font-bold tabular-nums text-gold">{entry.totalScore}</p>
+      <CompactStats stats={{ gamesPlayed: entry.gamesPlayed, goalsFor: entry.goalsFor, goalsAgainst: entry.goalsAgainst }} />
       <p className="text-[11px] text-muted-foreground">{place}º</p>
     </button>
   )
@@ -170,6 +181,7 @@ function TeamsDetail({ entry }: { entry: RankingEntryWithDelta }) {
             <span className="text-xs text-muted-foreground">
               {STAGE_SHORT[t.progress.stage_reached] ?? t.progress.stage_reached}
             </span>
+            <CompactStats stats={t.goalStats} />
             <span className="text-xs font-semibold tabular-nums text-gold">
               {t.breakdown.total} pts
             </span>
@@ -215,6 +227,7 @@ function RowHeader({
         )}
       </span>
       <Delta delta={entry.rankDelta} />
+      <CompactStats stats={{ gamesPlayed: entry.gamesPlayed, goalsFor: entry.goalsFor, goalsAgainst: entry.goalsAgainst }} />
       <span
         className={`text-sm tabular-nums text-gold ${
           isCurrentPlayer ? 'font-extrabold' : 'font-bold'
