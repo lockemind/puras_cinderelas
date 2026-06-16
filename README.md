@@ -61,11 +61,9 @@ Bonuses are **cumulative** — a Pot 4 team reaching the final earns all milesto
 
 ### Tiebreakers
 
-1. Most world champions
-2. Most finalists
-3. Most semi-finalists
-4. Most quarter-finalists
-5. Draw
+1. Most goals scored (aggregate of all 4 teams)
+2. Fewest goals suffered (aggregate of all 4 teams)
+3. Draw
 
 ---
 
