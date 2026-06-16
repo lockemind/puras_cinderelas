@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { getCompetition } from '@/actions/competition'
 import { getRankingsWithDeltas } from '@/actions/results'
 import { RankingTable } from '@/components/ranking-table'
 import { SyncIndicator } from '@/components/sync-indicator'
+import { PortugalCelebrationLoader } from '@/components/portugal-celebration-loader'
 
 const STATUS_MESSAGES: Record<string, string> = {
   setup: 'Competição em preparação',
@@ -49,6 +51,10 @@ export default async function PublicPage() {
           </div>
         )}
       </header>
+
+      <Suspense>
+        <PortugalCelebrationLoader />
+      </Suspense>
 
       {rankings.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center">

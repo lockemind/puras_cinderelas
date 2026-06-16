@@ -64,6 +64,19 @@
   --radius: 0.5rem;
 }
 
+@keyframes portugal-pulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes siuuu-jump {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-16px) scale(1.1); }
+  50% { transform: translateY(-20px) scale(1.15) rotate(-3deg); }
+  70% { transform: translateY(-10px) scale(1.05) rotate(2deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

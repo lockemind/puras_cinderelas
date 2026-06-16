@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getPlayerByToken } from '@/actions/players'
 import { PlayerNav } from '@/components/player-nav'
 import { PlayerHeaderMenu } from '@/components/player-header-menu'
+import { PortugalCelebrationLoader } from '@/components/portugal-celebration-loader'
 
 export default async function PlayerLayout({
   children,
@@ -42,6 +44,9 @@ export default async function PlayerLayout({
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-24">
+        <Suspense>
+          <PortugalCelebrationLoader />
+        </Suspense>
         {children}
       </main>
 
