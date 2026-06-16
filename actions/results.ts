@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getScoreBreakdown, mergeProgress, FD_WINNER_ADVANCES_TO } from '@/lib/scoring'
+import { compareRankingEntries, computeTeamGoalStats, sumGoalStats } from '@/lib/ranking'
 import type { StageReached } from '@/lib/types'
 
 const FD_LOSER_STAGE: Partial<Record<string, StageReached>> = {
@@ -69,13 +70,18 @@ function computeTeamStatsFromFixtures(fixtures: FixtureRow[]) {
   return stats
 }
 
-export async function fetchLiveStats() {
+async function fetchFinishedFixtureRows() {
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('fixtures')
     .select('stage, home_team_id, away_team_id, home_score, away_score')
     .eq('status', 'FINISHED')
-  return computeTeamStatsFromFixtures((data ?? []) as FixtureRow[])
+
+  return (data ?? []) as FixtureRow[]
+}
+
+export async function fetchLiveStats() {
+  return computeTeamStatsFromFixtures(await fetchFinishedFixtureRows())
 }
 
 export type UpdateTeamProgressInput = {
@@ -167,7 +173,7 @@ export async function getAllTeamsWithProgress() {
 export async function getRankings() {
   const supabase = createAdminClient()
 
-  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, liveStats] = await Promise.all([
+  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, finishedFixtures] = await Promise.all([
     supabase
       .from('players')
       .select('id, name, access_token')
@@ -181,11 +187,14 @@ export async function getRankings() {
           team_progress ( group_wins, group_draws, stage_reached, is_champion )
         )
       `),
-    fetchLiveStats(),
+    fetchFinishedFixtureRows(),
   ])
 
   if (pErr || !players) throw pErr ?? new Error('Could not fetch players')
   if (ptErr) throw ptErr
+
+  const liveStats = computeTeamStatsFromFixtures(finishedFixtures)
+  const goalStatsByTeam = computeTeamGoalStats(finishedFixtures)
 
   const ranked = players.map(player => {
     const myTeams = (playerTeams ?? []).filter(pt => pt.player_id === player.id)
@@ -211,27 +220,13 @@ export async function getRankings() {
       }
     })
 
+    const goalStats = sumGoalStats(teamsWithScores.map(t => t.team.id), goalStatsByTeam)
     const totalScore = teamsWithScores.reduce((s, t) => s + t.breakdown.total, 0)
-    return { player, teams: teamsWithScores, totalScore }
+    return { player, teams: teamsWithScores, totalScore, ...goalStats }
   })
 
   // Sort: total DESC, then tiebreakers
-  ranked.sort((a, b) => {
-    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore
-    const stages = ['champion', 'final', 'sf', 'qf'] as StageReached[]
-    for (const stage of stages) {
-      const countA = a.teams.filter(t => {
-        const order = ['group_stage','r32','r16','qf','sf','final','champion']
-        return order.indexOf(t.progress.stage_reached) >= order.indexOf(stage)
-      }).length
-      const countB = b.teams.filter(t => {
-        const order = ['group_stage','r32','r16','qf','sf','final','champion']
-        return order.indexOf(t.progress.stage_reached) >= order.indexOf(stage)
-      }).length
-      if (countB !== countA) return countB - countA
-    }
-    return 0
-  })
+  ranked.sort(compareRankingEntries)
 
   return ranked
 }

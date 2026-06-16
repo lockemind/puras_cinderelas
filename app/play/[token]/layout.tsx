@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { getPlayerByToken } from '@/actions/players'
 import { PlayerNav } from '@/components/player-nav'
+import { PlayerHeaderMenu } from '@/components/player-header-menu'
 
 export default async function PlayerLayout({
   children,
@@ -22,20 +22,23 @@ export default async function PlayerLayout({
 
   return (
     <div className="min-h-dvh bg-night flex flex-col">
-      <header className="px-4 pt-6 pb-2 flex items-center gap-3">
-        <Image
-          src="/logo.jpg"
-          alt="Puras Cinderelas"
-          width={40}
-          height={40}
-          className="w-10 h-10 rounded-full flex-shrink-0"
-        />
-        <div>
-          <p className="text-gold text-xs uppercase tracking-widest">
-            Puras Cinderelas 2026
-          </p>
-          <h1 className="text-foreground font-bold text-lg">{player.name}</h1>
+      <header className="px-4 pt-6 pb-2 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Image
+            src="/logo.jpg"
+            alt="Puras Cinderelas"
+            width={40}
+            height={40}
+            className="size-10 rounded-full flex-shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="text-gold text-xs uppercase tracking-widest">
+              Puras Cinderelas 2026
+            </p>
+            <h1 className="truncate text-foreground font-bold text-lg">{player.name}</h1>
+          </div>
         </div>
+        <PlayerHeaderMenu rulesHref={`${base}/rules`} />
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-24">
@@ -50,4 +53,3 @@ export default async function PlayerLayout({
     </div>
   )
 }
-
