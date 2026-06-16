@@ -6,6 +6,7 @@ export type FinishedFixtureScore = {
 }
 
 export type GoalStats = {
+  gamesPlayed: number
   goalsFor: number
   goalsAgainst: number
 }
@@ -21,7 +22,7 @@ export function computeTeamGoalStats(fixtures: FinishedFixtureScore[]) {
   const stats = new Map<string, GoalStats>()
 
   const ensure = (teamId: string) => {
-    if (!stats.has(teamId)) stats.set(teamId, { goalsFor: 0, goalsAgainst: 0 })
+    if (!stats.has(teamId)) stats.set(teamId, { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 })
     return stats.get(teamId)!
   }
 
@@ -30,12 +31,14 @@ export function computeTeamGoalStats(fixtures: FinishedFixtureScore[]) {
 
     if (fixture.home_team_id) {
       const home = ensure(fixture.home_team_id)
+      home.gamesPlayed++
       home.goalsFor += fixture.home_score
       home.goalsAgainst += fixture.away_score
     }
 
     if (fixture.away_team_id) {
       const away = ensure(fixture.away_team_id)
+      away.gamesPlayed++
       away.goalsFor += fixture.away_score
       away.goalsAgainst += fixture.home_score
     }
@@ -51,11 +54,12 @@ export function sumGoalStats(teamIds: string[], statsByTeam: Map<string, GoalSta
       if (!teamStats) return total
 
       return {
+        gamesPlayed: total.gamesPlayed + teamStats.gamesPlayed,
         goalsFor: total.goalsFor + teamStats.goalsFor,
         goalsAgainst: total.goalsAgainst + teamStats.goalsAgainst,
       }
     },
-    { goalsFor: 0, goalsAgainst: 0 }
+    { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 }
   )
 }
 

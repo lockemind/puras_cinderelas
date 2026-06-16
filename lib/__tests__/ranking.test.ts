@@ -9,6 +9,7 @@ import {
 const entry = (overrides: Partial<RankingSortEntry>): RankingSortEntry => ({
   player: { name: 'Jogador' },
   totalScore: 10,
+  gamesPlayed: 0,
   goalsFor: 0,
   goalsAgainst: 0,
   ...overrides,
@@ -22,9 +23,9 @@ describe('computeTeamGoalStats', () => {
       { home_team_id: 'bra', away_team_id: 'jpn', home_score: null, away_score: null },
     ])
 
-    expect(stats.get('por')).toEqual({ goalsFor: 5, goalsAgainst: 1 })
-    expect(stats.get('bra')).toEqual({ goalsFor: 1, goalsAgainst: 2 })
-    expect(stats.get('jpn')).toEqual({ goalsFor: 0, goalsAgainst: 3 })
+    expect(stats.get('por')).toEqual({ gamesPlayed: 2, goalsFor: 5, goalsAgainst: 1 })
+    expect(stats.get('bra')).toEqual({ gamesPlayed: 1, goalsFor: 1, goalsAgainst: 2 })
+    expect(stats.get('jpn')).toEqual({ gamesPlayed: 1, goalsFor: 0, goalsAgainst: 3 })
   })
 
   it('sums aggregate goal stats across a player squad', () => {
@@ -33,7 +34,7 @@ describe('computeTeamGoalStats', () => {
       { home_team_id: 'c', away_team_id: 'd', home_score: 0, away_score: 4 },
     ])
 
-    expect(sumGoalStats(['a', 'd'], stats)).toEqual({ goalsFor: 6, goalsAgainst: 1 })
+    expect(sumGoalStats(['a', 'd'], stats)).toEqual({ gamesPlayed: 2, goalsFor: 6, goalsAgainst: 1 })
   })
 })
 
