@@ -113,6 +113,7 @@ export default async function TeamPage({
                   updated_at: '',
                 })
             const breakdown = rankingTeam?.breakdown ?? getScoreBreakdown(progress, pt.pot)
+            const teamGoalStats = rankingTeam?.goalStats ?? { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 }
             return (
               <TeamCard
                 key={pt.id}
@@ -123,6 +124,7 @@ export default async function TeamPage({
                 progress={progress}
                 breakdown={breakdown}
                 eliminated={isTeamEliminated(team.id, progress, fixtures)}
+                goalStats={teamGoalStats}
               />
             )
           })}

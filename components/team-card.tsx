@@ -1,5 +1,6 @@
 import { MascotAvatar } from '@/components/mascot-avatar'
 import type { ScoreBreakdown } from '@/lib/scoring'
+import type { GoalStats } from '@/lib/ranking'
 import type { TeamProgress } from '@/lib/types'
 
 const STAGE_LABELS: Record<string, string> = {
@@ -20,6 +21,7 @@ export function TeamCard({
   progress,
   breakdown,
   eliminated,
+  goalStats,
 }: {
   name: string
   flagEmoji: string
@@ -28,6 +30,7 @@ export function TeamCard({
   progress: TeamProgress
   breakdown: ScoreBreakdown
   eliminated: boolean
+  goalStats: GoalStats
 }) {
   const hasCinderela = breakdown.cinderelaBonusTotal > 0
   const stageLabel =
@@ -56,7 +59,7 @@ export function TeamCard({
             {hasCinderela && !eliminated ? ' ✨' : ''}
           </p>
           <p className="text-xs text-muted-foreground">
-            Pote {pot} · {stageLabel}
+            Pote {pot} · {stageLabel} · {goalStats.gamesPlayed}({goalStats.goalsFor}/{goalStats.goalsAgainst})
           </p>
         </div>
         <span className={`text-[17px] font-bold tabular-nums ${eliminated ? 'text-muted-foreground' : 'text-gold'}`}>
@@ -72,6 +75,11 @@ export function TeamCard({
       </summary>
 
       <div className="px-4 pt-2.5 pb-3 border-t border-night-border space-y-1.5 text-[13px]">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">
+            Jogos: {goalStats.gamesPlayed} · Golos: {goalStats.goalsFor} marcados, {goalStats.goalsAgainst} sofridos
+          </span>
+        </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">
             Fase de grupos ({progress.group_wins}V {progress.group_draws}E)
