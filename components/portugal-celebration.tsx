@@ -61,6 +61,10 @@ const SIUUU_STICKERS = [
   '/instagram_joana_duarte/stickers/28_DNYxpKuoI64_sticker.png',
   '/instagram_joana_duarte/stickers/29_DMz4J4dIzWs_sticker.png',
   '/instagram_joana_duarte/stickers/30_DMdCUunIwpw_sticker.png',
+  '/ondemand/stickers/01_whatsapp_2026-06-17_171342_sticker.png',
+  '/ondemand/stickers/02_whatsapp_2026-06-17_171411_sticker.png',
+  '/ondemand/stickers/03_whatsapp_2026-06-17_171450_sticker.png',
+  '/ondemand/stickers/04_whatsapp_2026-06-17_171519_sticker.png',
 ] as const
 
 function randomStickerIndex(currentIndex?: number): number {
