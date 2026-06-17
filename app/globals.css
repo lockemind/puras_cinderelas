@@ -77,16 +77,12 @@
   100% { transform: translateY(0) scale(1) rotate(0deg); }
 }
 
-@keyframes siuuu-pop {
-  0% { opacity: 0; transform: translateY(12px) scale(0.88); }
-  70% { opacity: 1; transform: translateY(-4px) scale(1.03); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes siuuu-sticker {
-  0% { opacity: 0; transform: translateY(10px) rotate(-2deg) scale(0.92); }
-  45% { opacity: 1; transform: translateY(-4px) rotate(1deg) scale(1.02); }
-  100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+@keyframes siuuu-float {
+  0% { opacity: 0; transform: translateY(34px) rotate(-8deg) scale(0.78); }
+  14% { opacity: 1; transform: translateY(-8px) rotate(4deg) scale(1.04); }
+  30% { opacity: 1; transform: translateY(0) rotate(-2deg) scale(1); }
+  78% { opacity: 1; transform: translateY(-18px) rotate(2deg) scale(1); }
+  100% { opacity: 0; transform: translateY(-42px) rotate(7deg) scale(0.94); }
 }
 
 @layer base {

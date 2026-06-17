@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { PortugalGameStatus } from '@/lib/portugal'
 import { toDisplayTime } from '@/lib/fixtures'
 
@@ -16,6 +16,11 @@ type Particle = {
   rotationSpeed: number
   opacity: number
   shape: 'rect' | 'circle'
+}
+
+type DragOffset = {
+  x: number
+  y: number
 }
 
 const PT_COLORS = [
@@ -204,12 +209,18 @@ function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
   const [showMilestone, setShowMilestone] = useState(false)
   const [milestoneCount, setMilestoneCount] = useState(0)
   const [stickerIndex, setStickerIndex] = useState(0)
+  const [dragOffset, setDragOffset] = useState<DragOffset>({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
   const nextMilestoneCountRef = useRef(randomSiuuuMilestoneInterval())
   const animationTimeoutRef = useRef<number | null>(null)
   const milestoneTimeoutRef = useRef<number | null>(null)
+  const dragStartRef = useRef<DragOffset | null>(null)
 
   const dismissMilestone = useCallback(() => {
     setShowMilestone(false)
+    setDragOffset({ x: 0, y: 0 })
+    setIsDragging(false)
+    dragStartRef.current = null
     if (milestoneTimeoutRef.current != null) {
       window.clearTimeout(milestoneTimeoutRef.current)
       milestoneTimeoutRef.current = null
@@ -235,6 +246,9 @@ function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
     nextMilestoneCountRef.current = siuCount + randomSiuuuMilestoneInterval()
     setMilestoneCount(siuCount)
     setStickerIndex(randomStickerIndex())
+    setDragOffset({ x: 0, y: 0 })
+    setIsDragging(false)
+    dragStartRef.current = null
     setShowMilestone(true)
     onSiuuu()
     if (milestoneTimeoutRef.current != null) {
@@ -243,8 +257,45 @@ function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
     milestoneTimeoutRef.current = window.setTimeout(() => {
       setShowMilestone(false)
       milestoneTimeoutRef.current = null
-    }, 6900)
+    }, 3600)
   }, [siuCount, onSiuuu])
+
+  const handleStickerPointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    dragStartRef.current = { x: event.clientX, y: event.clientY }
+    setIsDragging(true)
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }, [])
+
+  const handleStickerPointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const dragStart = dragStartRef.current
+    if (!dragStart) return
+
+    setDragOffset({
+      x: event.clientX - dragStart.x,
+      y: event.clientY - dragStart.y,
+    })
+  }, [])
+
+  const handleStickerPointerEnd = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const dragStart = dragStartRef.current
+    if (!dragStart) return
+
+    const nextOffset = {
+      x: event.clientX - dragStart.x,
+      y: event.clientY - dragStart.y,
+    }
+    const swipeDistance = Math.hypot(nextOffset.x, nextOffset.y)
+
+    dragStartRef.current = null
+    setIsDragging(false)
+
+    if (swipeDistance >= 70) {
+      dismissMilestone()
+      return
+    }
+
+    setDragOffset({ x: 0, y: 0 })
+  }, [dismissMilestone])
 
   useEffect(() => {
     return () => {
@@ -254,6 +305,7 @@ function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
       if (milestoneTimeoutRef.current != null) {
         window.clearTimeout(milestoneTimeoutRef.current)
       }
+      dragStartRef.current = null
     }
   }, [])
 
@@ -284,41 +336,37 @@ function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
       </button>
 
       {showMilestone ? (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 px-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="siuuu-69-title"
-        >
-          <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-gold/60 bg-night-card p-6 text-center shadow-2xl shadow-gold/20 animate-[siuuu-pop_0.45s_cubic-bezier(.2,1.4,.4,1)]">
-            <button
-              type="button"
-              onClick={dismissMilestone}
-              aria-label="Fechar celebração dos SIUUUS"
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/10 text-lg leading-none text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+        <div className="pointer-events-none fixed inset-x-0 bottom-16 z-[60] flex justify-center px-4 sm:bottom-8 sm:justify-end sm:px-8">
+          <div className="pointer-events-auto relative animate-[siuuu-float_3.6s_ease-out_both]">
+            <div
+              className={`relative touch-none select-none cursor-grab active:cursor-grabbing ${
+                isDragging ? 'transition-none' : 'transition-transform duration-200 ease-out'
+              }`}
+              role="button"
+              tabIndex={0}
+              aria-label="Sticker dos SIUUUS, arrasta para fechar"
+              onPointerDown={handleStickerPointerDown}
+              onPointerMove={handleStickerPointerMove}
+              onPointerUp={handleStickerPointerEnd}
+              onPointerCancel={handleStickerPointerEnd}
+              style={{
+                transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${dragOffset.x / 18}deg)`,
+              }}
             >
-              ×
-            </button>
-            <div className="mx-auto mb-4 flex h-72 w-full items-center justify-center overflow-hidden">
+              <span className="absolute -right-1 top-5 z-10 rounded-full border border-red-500/70 bg-red-600 px-2 py-1 text-xs font-black text-white shadow-lg shadow-black/30">
+                {milestoneCount}x
+              </span>
               <Image
                 key={stickerSrc}
                 src={stickerSrc}
                 alt="Sticker da Joana Duarte"
-                width={280}
-                height={360}
-                sizes="(max-width: 640px) 80vw, 280px"
-                className="h-full w-full object-contain drop-shadow-[0_18px_35px_rgba(0,0,0,0.45)] animate-[siuuu-sticker_1.2s_ease-in-out]"
+                width={300}
+                height={380}
+                sizes="(max-width: 640px) 68vw, 300px"
+                className="h-[44vh] max-h-[380px] min-h-[220px] w-auto object-contain drop-shadow-[0_22px_34px_rgba(0,0,0,0.48)]"
+                draggable={false}
               />
             </div>
-            <p id="siuuu-69-title" className="text-4xl font-black tracking-normal text-gold">
-              {milestoneCount} SIUUUS!
-            </p>
-            <p className="mt-2 text-sm font-bold uppercase tracking-wide text-white">
-              Nice. Cristiano aprovava.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Marco lendário desbloqueado. A bancada está oficialmente em modo festa.
-            </p>
           </div>
         </div>
       ) : null}
