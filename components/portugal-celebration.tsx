@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PortugalGameStatus } from '@/lib/portugal'
 import { toDisplayTime } from '@/lib/fixtures'
@@ -25,6 +26,51 @@ const PT_COLORS = [
   '#003300', // dark green
   '#CC0000', // dark red
 ]
+
+const SIUUU_STICKERS = [
+  '/instagram_joana_duarte/stickers/03_DRhRGStCDBK_sticker.png',
+  '/instagram_joana_duarte/stickers/04_DRUzlqLCBki_sticker.png',
+  '/instagram_joana_duarte/stickers/05_DRH05xeCMRE_sticker.png',
+  '/instagram_joana_duarte/stickers/06_DQ9-3RxCAKW_sticker.png',
+  '/instagram_joana_duarte/stickers/07_DQcNItfiJJi_sticker.png',
+  '/instagram_joana_duarte/stickers/08_DQHre4oiMMH_sticker.png',
+  '/instagram_joana_duarte/stickers/09_DQE_rFuiFJN_sticker.png',
+  '/instagram_joana_duarte/stickers/10_DQABpE7iCy3_sticker.png',
+  '/instagram_joana_duarte/stickers/11_DP68iTCCBXD_sticker.png',
+  '/instagram_joana_duarte/stickers/12_DPZQArwiE-i_sticker.png',
+  '/instagram_joana_duarte/stickers/13_DPHbTpICJJL_sticker.png',
+  '/instagram_joana_duarte/stickers/14_DO5oGIDiII1_sticker.png',
+  '/instagram_joana_duarte/stickers/15_DOx2pPWCOJt_sticker.png',
+  '/instagram_joana_duarte/stickers/16_DOwYz5mCKjA_sticker.png',
+  '/instagram_joana_duarte/stickers/17_DOvLAb-iKBz_sticker.png',
+  '/instagram_joana_duarte/stickers/18_DOsuOSFiKbD_sticker.png',
+  '/instagram_joana_duarte/stickers/19_DOgqj2eCMrK_sticker.png',
+  '/instagram_joana_duarte/stickers/20_DOa3SpbiDeA_sticker.png',
+  '/instagram_joana_duarte/stickers/21_DOWhL5_iGP__sticker.png',
+  '/instagram_joana_duarte/stickers/22_DODz7mniHEf_sticker.png',
+  '/instagram_joana_duarte/stickers/23_DOBJ5oxCK6r_sticker.png',
+  '/instagram_joana_duarte/stickers/24_DN8G5zviDuF_sticker.png',
+  '/instagram_joana_duarte/stickers/25_DNtSkSN0AhV_sticker.png',
+  '/instagram_joana_duarte/stickers/26_DNlWpUIoS5S_sticker.png',
+  '/instagram_joana_duarte/stickers/27_DNfxwqFseNF_sticker.png',
+  '/instagram_joana_duarte/stickers/28_DNYxpKuoI64_sticker.png',
+  '/instagram_joana_duarte/stickers/29_DMz4J4dIzWs_sticker.png',
+  '/instagram_joana_duarte/stickers/30_DMdCUunIwpw_sticker.png',
+] as const
+
+function randomStickerIndex(currentIndex?: number): number {
+  if (SIUUU_STICKERS.length <= 1) return 0
+
+  let nextIndex = Math.floor(Math.random() * SIUUU_STICKERS.length)
+  while (nextIndex === currentIndex) {
+    nextIndex = Math.floor(Math.random() * SIUUU_STICKERS.length)
+  }
+  return nextIndex
+}
+
+function randomSiuuuMilestoneInterval(): number {
+  return 1 + Math.floor(Math.random() * 9)
+}
 
 function useConfetti(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const particles = useRef<Particle[]>([])
@@ -155,36 +201,128 @@ function PortugalBanner({
 function SiuuuButton({ onSiuuu }: { onSiuuu: () => void }) {
   const [animating, setAnimating] = useState(false)
   const [siuCount, setSiuCount] = useState(0)
+  const [showMilestone, setShowMilestone] = useState(false)
+  const [milestoneCount, setMilestoneCount] = useState(0)
+  const [stickerIndex, setStickerIndex] = useState(0)
+  const nextMilestoneCountRef = useRef(randomSiuuuMilestoneInterval())
+  const animationTimeoutRef = useRef<number | null>(null)
+  const milestoneTimeoutRef = useRef<number | null>(null)
+
+  const dismissMilestone = useCallback(() => {
+    setShowMilestone(false)
+    if (milestoneTimeoutRef.current != null) {
+      window.clearTimeout(milestoneTimeoutRef.current)
+      milestoneTimeoutRef.current = null
+    }
+  }, [])
 
   const handleClick = () => {
     setAnimating(true)
     setSiuCount(c => c + 1)
     onSiuuu()
-    setTimeout(() => setAnimating(false), 800)
+    if (animationTimeoutRef.current != null) {
+      window.clearTimeout(animationTimeoutRef.current)
+    }
+    animationTimeoutRef.current = window.setTimeout(() => {
+      setAnimating(false)
+      animationTimeoutRef.current = null
+    }, 800)
   }
 
+  useEffect(() => {
+    if (siuCount < nextMilestoneCountRef.current) return
+
+    nextMilestoneCountRef.current = siuCount + randomSiuuuMilestoneInterval()
+    setMilestoneCount(siuCount)
+    setStickerIndex(randomStickerIndex())
+    setShowMilestone(true)
+    onSiuuu()
+    if (milestoneTimeoutRef.current != null) {
+      window.clearTimeout(milestoneTimeoutRef.current)
+    }
+    milestoneTimeoutRef.current = window.setTimeout(() => {
+      setShowMilestone(false)
+      milestoneTimeoutRef.current = null
+    }, 6900)
+  }, [siuCount, onSiuuu])
+
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current != null) {
+        window.clearTimeout(animationTimeoutRef.current)
+      }
+      if (milestoneTimeoutRef.current != null) {
+        window.clearTimeout(milestoneTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  const stickerSrc = SIUUU_STICKERS[stickerIndex]
+
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={`
-        relative flex items-center gap-2 rounded-full px-5 py-2.5
-        bg-[linear-gradient(135deg,#006600,#004d00)] border border-green-600/50
-        text-white font-extrabold text-sm uppercase tracking-widest
-        active:scale-95 transition-transform
-        ${animating ? 'animate-[siuuu-jump_0.8s_ease-out]' : ''}
-      `}
-    >
-      <span className={`text-lg transition-transform ${animating ? 'scale-125' : ''}`}>
-        🇵🇹
-      </span>
-      <span>SIUUU!</span>
-      {siuCount > 0 && (
-        <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white px-1">
-          {siuCount}
+    <>
+      <button
+        type="button"
+        onClick={handleClick}
+        className={`
+          relative flex items-center gap-2 rounded-full px-5 py-2.5
+          bg-[linear-gradient(135deg,#006600,#004d00)] border border-green-600/50
+          text-white font-extrabold text-sm uppercase tracking-widest
+          active:scale-95 transition-transform
+          ${animating ? 'animate-[siuuu-jump_0.8s_ease-out]' : ''}
+        `}
+      >
+        <span className={`text-lg transition-transform ${animating ? 'scale-125' : ''}`}>
+          🇵🇹
         </span>
-      )}
-    </button>
+        <span>SIUUU!</span>
+        {siuCount > 0 && (
+          <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+            {siuCount}
+          </span>
+        )}
+      </button>
+
+      {showMilestone ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 px-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="siuuu-69-title"
+        >
+          <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-gold/60 bg-night-card p-6 text-center shadow-2xl shadow-gold/20 animate-[siuuu-pop_0.45s_cubic-bezier(.2,1.4,.4,1)]">
+            <button
+              type="button"
+              onClick={dismissMilestone}
+              aria-label="Fechar celebração dos SIUUUS"
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/10 text-lg leading-none text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+            >
+              ×
+            </button>
+            <div className="mx-auto mb-4 flex h-72 w-full items-center justify-center overflow-hidden">
+              <Image
+                key={stickerSrc}
+                src={stickerSrc}
+                alt="Sticker da Joana Duarte"
+                width={280}
+                height={360}
+                sizes="(max-width: 640px) 80vw, 280px"
+                className="h-full w-full object-contain drop-shadow-[0_18px_35px_rgba(0,0,0,0.45)] animate-[siuuu-sticker_1.2s_ease-in-out]"
+              />
+            </div>
+            <p id="siuuu-69-title" className="text-4xl font-black tracking-normal text-gold">
+              {milestoneCount} SIUUUS!
+            </p>
+            <p className="mt-2 text-sm font-bold uppercase tracking-wide text-white">
+              Nice. Cristiano aprovava.
+            </p>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Marco lendário desbloqueado. A bancada está oficialmente em modo festa.
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </>
   )
 }
 
