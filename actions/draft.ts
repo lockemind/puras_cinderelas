@@ -11,6 +11,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function assignPot1Team(playerId: string, teamId: string | null) {
   const supabase = createAdminClient()
 
+  const { data: player } = await supabase
+    .from('players')
+    .select('is_guest')
+    .eq('id', playerId)
+    .single()
+
+  if (!player) throw new Error('Jogador não encontrado')
+  if (player.is_guest) throw new Error('Convidados não podem receber equipas')
+
   if (!teamId) {
     await supabase
       .from('player_teams')
@@ -67,11 +76,12 @@ export async function chooseTeam(
 
   const { data: player } = await supabase
     .from('players')
-    .select('id')
+    .select('id, is_guest')
     .eq('access_token', playerToken)
     .single()
 
   if (!player) throw new Error('Jogador não encontrado')
+  if (player.is_guest) throw new Error('Convidados não podem escolher equipas')
 
   const { data: team } = await supabase
     .from('teams')

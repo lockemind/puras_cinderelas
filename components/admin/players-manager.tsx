@@ -1,18 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { createPlayer } from '@/actions/players'
+import { createGuestPlayer, createPlayer } from '@/actions/players'
+import { getPlayerDisplayName } from '@/lib/player-display'
 import type { Player } from '@/lib/types'
 
+function subscribeToOrigin() {
+  return () => {}
+}
+
+function getBrowserOrigin() {
+  return window.location.origin
+}
+
+function getServerOrigin() {
+  return ''
+}
+
 export function PlayersManager({ players }: { players: Player[] }) {
+  const router = useRouter()
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [guestLoading, setGuestLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const baseUrl = useSyncExternalStore(
+    subscribeToOrigin,
+    getBrowserOrigin,
+    getServerOrigin
+  )
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+  const participantCount = players.filter(player => !player.is_guest).length
+  const hasGuest = players.some(player => player.is_guest)
 
   async function handleCreate() {
     if (!name.trim()) return
@@ -21,6 +44,7 @@ export function PlayersManager({ players }: { players: Player[] }) {
     try {
       await createPlayer(name)
       setName('')
+      router.refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao criar jogador')
     } finally {
@@ -28,11 +52,24 @@ export function PlayersManager({ players }: { players: Player[] }) {
     }
   }
 
+  async function handleCreateGuest() {
+    setGuestLoading(true)
+    setError(null)
+    try {
+      await createGuestPlayer()
+      router.refresh()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao criar convidado')
+    } finally {
+      setGuestLoading(false)
+    }
+  }
+
   return (
     <Card className="bg-night-card border-night-border">
       <CardHeader>
         <CardTitle className="text-gold text-sm uppercase tracking-widest">
-          Jogadores ({players.length}/13)
+          Jogadores ({participantCount}/13)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -46,12 +83,20 @@ export function PlayersManager({ players }: { players: Player[] }) {
           />
           <Button
             onClick={handleCreate}
-            disabled={loading || players.length >= 13}
+            disabled={loading || participantCount >= 13}
             className="bg-gold text-night hover:bg-gold-light font-semibold shrink-0"
           >
             {loading ? '...' : 'Adicionar'}
           </Button>
         </div>
+        <Button
+          onClick={handleCreateGuest}
+          disabled={guestLoading || hasGuest}
+          variant="outline"
+          className="border-night-border text-foreground hover:bg-night w-full"
+        >
+          {guestLoading ? '...' : hasGuest ? 'Conta de convidado criada' : 'Criar conta de convidado'}
+        </Button>
         {error && <p className="text-destructive text-sm">{error}</p>}
         <div className="space-y-2">
           {players.map(player => (
@@ -59,7 +104,16 @@ export function PlayersManager({ players }: { players: Player[] }) {
               key={player.id}
               className="flex flex-col gap-1 rounded border border-night-border bg-night p-3"
             >
-              <span className="text-foreground font-medium">{player.name}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-foreground font-medium">
+                  {getPlayerDisplayName(player)}
+                </span>
+                {player.is_guest && (
+                  <Badge variant="outline" className="border-gold/30 text-gold">
+                    Convidado
+                  </Badge>
+                )}
+              </div>
               <a
                 href={`${baseUrl}/play/${player.access_token}`}
                 target="_blank"

@@ -5,6 +5,7 @@ import { getPlayerByToken } from '@/actions/players'
 import { PlayerNav } from '@/components/player-nav'
 import { PlayerHeaderMenu } from '@/components/player-header-menu'
 import { PortugalCelebrationLoader } from '@/components/portugal-celebration-loader'
+import { getPlayerDisplayName } from '@/lib/player-display'
 
 export default async function PlayerLayout({
   children,
@@ -21,6 +22,7 @@ export default async function PlayerLayout({
   }
 
   const base = `/play/${token}`
+  const displayName = getPlayerDisplayName(player)
 
   return (
     <div className="min-h-dvh bg-night flex flex-col">
@@ -37,7 +39,7 @@ export default async function PlayerLayout({
             <p className="text-gold text-xs uppercase tracking-widest">
               Puras Cinderelas 2026
             </p>
-            <h1 className="truncate text-foreground font-bold text-lg">{player.name}</h1>
+            <h1 className="truncate text-foreground font-bold text-lg">{displayName}</h1>
           </div>
         </div>
         <PlayerHeaderMenu rulesHref={`${base}/rules`} />

@@ -20,6 +20,7 @@ export default async function AdminPage() {
   const pot1Teams = (teams ?? [])
     .filter(t => t.pot === 1)
     .map(t => ({ id: t.id, name: t.name, flag_emoji: t.flag_emoji }))
+  const participantPlayers = players.filter(player => !player.is_guest)
 
   return (
     <div className="space-y-6">
@@ -27,7 +28,7 @@ export default async function AdminPage() {
       <PlayersManager players={players} />
       {competition.status === 'draft' && (
         <Pot1Assignment
-          players={players}
+          players={participantPlayers}
           pot1Teams={pot1Teams}
           assignments={pot1Assignments}
         />

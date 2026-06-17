@@ -25,6 +25,7 @@ export type Player = {
   id: string
   name: string
   access_token: string
+  is_guest: boolean
   created_at: string
 }
 

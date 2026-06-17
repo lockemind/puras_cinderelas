@@ -39,6 +39,7 @@ export default async function TeamPage({
   ])
 
   const isDraft = competition.status === 'draft'
+  const isGuest = player.is_guest
 
   if (isDraft) {
     const pot1Assignment = myTeams?.find(pt => pt.pot === 1)
@@ -71,9 +72,15 @@ export default async function TeamPage({
           )}
         </div>
 
-        <TeamSelector pot={2} teams={pot2Teams} currentTeamId={getChoice(2)?.id ?? null} playerToken={token} />
-        <TeamSelector pot={3} teams={pot3Teams} currentTeamId={getChoice(3)?.id ?? null} playerToken={token} />
-        <TeamSelector pot={4} teams={pot4Teams} currentTeamId={getChoice(4)?.id ?? null} playerToken={token} />
+        {isGuest && (
+          <div className="rounded border border-night-border bg-night-card px-4 py-3 text-sm text-muted-foreground">
+            Modo convidado: podes consultar os ecrãs, mas não escolher equipas.
+          </div>
+        )}
+
+        <TeamSelector pot={2} teams={pot2Teams} currentTeamId={getChoice(2)?.id ?? null} playerToken={token} readOnly={isGuest} />
+        <TeamSelector pot={3} teams={pot3Teams} currentTeamId={getChoice(3)?.id ?? null} playerToken={token} readOnly={isGuest} />
+        <TeamSelector pot={4} teams={pot4Teams} currentTeamId={getChoice(4)?.id ?? null} playerToken={token} readOnly={isGuest} />
       </div>
     )
   }

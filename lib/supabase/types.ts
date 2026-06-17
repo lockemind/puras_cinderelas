@@ -133,18 +133,21 @@ export type Database = {
           access_token: string
           created_at: string
           id: string
+          is_guest: boolean
           name: string
         }
         Insert: {
           access_token?: string
           created_at?: string
           id?: string
+          is_guest?: boolean
           name: string
         }
         Update: {
           access_token?: string
           created_at?: string
           id?: string
+          is_guest?: boolean
           name?: string
         }
         Relationships: []

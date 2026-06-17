@@ -180,7 +180,8 @@ export async function getRankings() {
   const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, finishedFixtures] = await Promise.all([
     supabase
       .from('players')
-      .select('id, name, access_token')
+      .select('id, name, access_token, is_guest')
+      .eq('is_guest', false)
       .order('name', { ascending: true }),
     supabase
       .from('player_teams')

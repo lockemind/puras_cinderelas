@@ -10,17 +10,20 @@ export function TeamSelector({
   teams,
   currentTeamId,
   playerToken,
+  readOnly = false,
 }: {
   pot: 2 | 3 | 4
   teams: Team[]
   currentTeamId: string | null
   playerToken: string
+  readOnly?: boolean
 }) {
   const [selected, setSelected] = useState<string | null>(currentTeamId)
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function handleChoose(teamId: string) {
+    if (readOnly) return
     setLoading(teamId)
     setError(null)
     try {
@@ -36,7 +39,7 @@ export function TeamSelector({
   return (
     <div className="space-y-2">
       <p className="text-muted-foreground text-xs uppercase tracking-wider">
-        Pote {pot} — {selected ? 'escolhido' : 'escolhe uma equipa'}
+        Pote {pot} — {readOnly ? 'consulta' : selected ? 'escolhido' : 'escolhe uma equipa'}
       </p>
       <div className="grid grid-cols-2 gap-2">
         {teams.map(team => {
@@ -45,12 +48,12 @@ export function TeamSelector({
             <button
               key={team.id}
               onClick={() => handleChoose(team.id)}
-              disabled={!!loading}
+              disabled={readOnly || !!loading}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded border text-sm transition-colors
                 ${isSelected
                   ? 'border-gold bg-gold-muted text-gold font-semibold'
-                  : 'border-night-border bg-night text-foreground hover:border-gold/50'
+                  : `border-night-border bg-night text-foreground ${readOnly ? 'opacity-80' : 'hover:border-gold/50'}`
                 }
               `}
             >
