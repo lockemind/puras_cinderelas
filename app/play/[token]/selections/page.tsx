@@ -13,6 +13,7 @@ import { getWinWorth } from '@/lib/scoring'
 import { MascotAvatar } from '@/components/mascot-avatar'
 import { NextMatchHero } from '@/components/next-match-hero'
 import { LiveMinute } from '@/components/live-minute'
+import { FullScheduleDetails } from '@/components/full-schedule-details'
 import type { Fixture } from '@/lib/types'
 
 const FD_STAGE_LABELS: Record<string, string> = {
@@ -22,6 +23,26 @@ const FD_STAGE_LABELS: Record<string, string> = {
   QUARTER_FINALS: 'Quartos',
   SEMI_FINALS: 'Meias',
   FINAL: 'Final',
+}
+
+const CALENDAR_INACTIVE_STATUSES = ['FINISHED', 'CANCELLED', 'POSTPONED']
+
+function getScheduleMeta(groups: ReturnType<typeof groupFixturesByDate>) {
+  const nowTime = Date.now()
+  const isLive = (f: Fixture) => LIVE_STATUSES.includes(f.status)
+  const isCalendarRelevant = (f: Fixture) =>
+    isLive(f) ||
+    (!CALENDAR_INACTIVE_STATUSES.includes(f.status) &&
+      new Date(f.utc_date).getTime() >= nowTime)
+  const firstRelevantGroupIndex = groups.findIndex(group =>
+    group.fixtures.some(isCalendarRelevant)
+  )
+
+  return {
+    firstRelevantGroupId:
+      firstRelevantGroupIndex >= 0 ? `full-schedule-group-${firstRelevantGroupIndex}` : null,
+    isCalendarRelevant,
+  }
 }
 
 export default async function JogosPage({
@@ -55,6 +76,8 @@ export default async function JogosPage({
   }
 
   const { hero, myToday, othersToday } = splitFixturesForPlayer(fixtures, myTeamIds)
+  const scheduleGroups = groupFixturesByDate(fixtures)
+  const { firstRelevantGroupId, isCalendarRelevant } = getScheduleMeta(scheduleGroups)
 
   // Hero teams: my side vs opponent (if both sides are mine, lead with the higher pot — bigger bonus)
   let heroProps = null
@@ -180,57 +203,78 @@ export default async function JogosPage({
         </section>
       )}
 
-      <details className="group">
-        <summary className="cursor-pointer list-none text-center text-[13px] font-medium text-gold-dark active:opacity-70 py-1">
-          ver calendário completo{' '}
-          <span className="inline-block transition-transform duration-200 group-open:rotate-180">
-            ▾
-          </span>
-        </summary>
+      <FullScheduleDetails targetId={firstRelevantGroupId}>
         <div className="mt-4 space-y-6">
-          {groupFixturesByDate(fixtures).map(group => (
-            <div key={group.dateKey}>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">
-                {group.label}
-              </p>
-              <div className="space-y-1">
-                {group.fixtures.map(f => (
-                  <Link
-                    key={f.id}
-                    href={`/play/${token}/selections/${f.id}`}
-                    className={`flex items-center gap-2 px-3 py-2 rounded border text-sm active:opacity-70 ${
-                      (f.home_team && myTeamIds.has(f.home_team.id)) ||
-                      (f.away_team && myTeamIds.has(f.away_team.id))
-                        ? 'border-gold/40 bg-gold-muted'
-                        : 'border-night-border bg-night-card'
-                    }`}
-                  >
-                    <span className="text-base w-6 text-center">
-                      {f.home_team?.flag_emoji ?? '?'}
-                    </span>
-                    <span className="text-foreground flex-1 truncate">
-                      {f.home_team?.name ?? '—'}
-                    </span>
-                    <span className="tabular-nums text-xs font-mono text-center w-14">
-                      {f.status === 'FINISHED'
-                        ? `${f.home_score ?? '?'} – ${f.away_score ?? '?'}`
-                        : isLive(f)
-                        ? 'AO VIVO'
-                        : toDisplayTime(f.utc_date)}
-                    </span>
-                    <span className="text-foreground flex-1 truncate text-right">
-                      {f.away_team?.name ?? '—'}
-                    </span>
-                    <span className="text-base w-6 text-center">
-                      {f.away_team?.flag_emoji ?? '?'}
-                    </span>
-                  </Link>
-                ))}
+          {scheduleGroups.map((group, groupIndex) => {
+            const groupIsPast = group.fixtures.every(f => !isCalendarRelevant(f))
+            const groupId = `full-schedule-group-${groupIndex}`
+
+            return (
+              <div key={group.dateKey} id={groupId} className="scroll-mt-5">
+                <p
+                  className={`text-xs uppercase tracking-wider mb-2 ${
+                    groupIsPast
+                      ? 'text-muted-foreground/55'
+                      : groupId === firstRelevantGroupId
+                      ? 'text-gold'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {group.label}
+                </p>
+                <div className="space-y-1">
+                  {group.fixtures.map(f => (
+                    <Link
+                      key={f.id}
+                      href={`/play/${token}/selections/${f.id}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded border text-sm active:opacity-70 ${
+                        groupIsPast
+                          ? 'border-night-border/50 bg-night-card/45 text-muted-foreground'
+                          : (f.home_team && myTeamIds.has(f.home_team.id)) ||
+                            (f.away_team && myTeamIds.has(f.away_team.id))
+                          ? 'border-gold/40 bg-gold-muted'
+                          : 'border-night-border bg-night-card'
+                      }`}
+                    >
+                      <span className="text-base w-6 text-center">
+                        {f.home_team?.flag_emoji ?? '?'}
+                      </span>
+                      <span
+                        className={`flex-1 truncate ${
+                          groupIsPast ? 'text-muted-foreground' : 'text-foreground'
+                        }`}
+                      >
+                        {f.home_team?.name ?? '—'}
+                      </span>
+                      <span
+                        className={`tabular-nums text-xs font-mono text-center w-14 ${
+                          groupIsPast ? 'text-muted-foreground/75' : ''
+                        }`}
+                      >
+                        {f.status === 'FINISHED'
+                          ? `${f.home_score ?? '?'} – ${f.away_score ?? '?'}`
+                          : isLive(f)
+                          ? 'AO VIVO'
+                          : toDisplayTime(f.utc_date)}
+                      </span>
+                      <span
+                        className={`flex-1 truncate text-right ${
+                          groupIsPast ? 'text-muted-foreground' : 'text-foreground'
+                        }`}
+                      >
+                        {f.away_team?.name ?? '—'}
+                      </span>
+                      <span className="text-base w-6 text-center">
+                        {f.away_team?.flag_emoji ?? '?'}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
-      </details>
+      </FullScheduleDetails>
     </div>
   )
 }
