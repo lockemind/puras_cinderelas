@@ -2,86 +2,22 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getScoreBreakdown, mergeProgress, FD_WINNER_ADVANCES_TO } from '@/lib/scoring'
+import { getScoreBreakdown, mergeProgress } from '@/lib/scoring'
 import { compareRankingEntries, computeTeamGoalStats, sumGoalStats } from '@/lib/ranking'
+import { computeTeamStatsFromFixtures, type ProgressFixtureRow } from '@/lib/team-progress'
 import type { StageReached } from '@/lib/types'
 
-const FD_LOSER_STAGE: Partial<Record<string, StageReached>> = {
-  LAST_32: 'r32',
-  LAST_16: 'r16',
-  QUARTER_FINALS: 'qf',
-  SEMI_FINALS: 'sf',
-  FINAL: 'final',
-}
-
-type FixtureRow = {
-  stage: string
-  home_team_id: string | null
-  away_team_id: string | null
-  home_score: number | null
-  away_score: number | null
-}
-
-function computeTeamStatsFromFixtures(fixtures: FixtureRow[]) {
-  const stats = new Map<string, {
-    group_wins: number
-    group_draws: number
-    stage_reached: StageReached
-    is_champion: boolean
-  }>()
-
-  const ensure = (id: string) => {
-    if (!stats.has(id))
-      stats.set(id, { group_wins: 0, group_draws: 0, stage_reached: 'group_stage', is_champion: false })
-    return stats.get(id)!
-  }
-
-  for (const f of fixtures) {
-    const h = f.home_team_id
-    const a = f.away_team_id
-    if (f.home_score == null || f.away_score == null) continue
-
-    if (f.stage === 'GROUP_STAGE') {
-      if (f.home_score > f.away_score) {
-        if (h) ensure(h).group_wins++
-      } else if (f.away_score > f.home_score) {
-        if (a) ensure(a).group_wins++
-      } else {
-        if (h) ensure(h).group_draws++
-        if (a) ensure(a).group_draws++
-      }
-    } else {
-      const loserStage = FD_LOSER_STAGE[f.stage]
-      const winnerStage = FD_WINNER_ADVANCES_TO[f.stage]
-      if (!loserStage || !winnerStage) continue
-      if (f.home_score !== f.away_score) {
-        const winnerId = f.home_score > f.away_score ? h : a
-        const loserId = f.home_score > f.away_score ? a : h
-        if (loserId) ensure(loserId).stage_reached = loserStage
-        if (winnerId) {
-          const s = ensure(winnerId)
-          s.stage_reached = winnerStage
-          if (winnerStage === 'champion') s.is_champion = true
-        }
-      }
-    }
-  }
-
-  return stats
-}
-
-async function fetchFinishedFixtureRows() {
+async function fetchFixtureRows() {
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('fixtures')
-    .select('stage, home_team_id, away_team_id, home_score, away_score')
-    .eq('status', 'FINISHED')
+    .select('stage, "group", status, home_team_id, away_team_id, home_score, away_score')
 
-  return (data ?? []) as FixtureRow[]
+  return (data ?? []) as ProgressFixtureRow[]
 }
 
 export async function fetchLiveStats() {
-  return computeTeamStatsFromFixtures(await fetchFinishedFixtureRows())
+  return computeTeamStatsFromFixtures(await fetchFixtureRows())
 }
 
 export type UpdateTeamProgressInput = {
@@ -142,7 +78,7 @@ export async function triggerManualSync() {
 
 export async function getAllTeamsWithProgress() {
   const supabase = createAdminClient()
-  const [{ data, error }, finishedFixtures] = await Promise.all([
+  const [{ data, error }, fixtures] = await Promise.all([
     supabase
       .from('teams')
       .select(`
@@ -153,13 +89,13 @@ export async function getAllTeamsWithProgress() {
       `)
       .order('pot', { ascending: true })
       .order('name', { ascending: true }),
-    fetchFinishedFixtureRows(),
+    fetchFixtureRows(),
   ])
 
   if (error) throw error
 
-  const liveStats = computeTeamStatsFromFixtures(finishedFixtures)
-  const goalStatsByTeam = computeTeamGoalStats(finishedFixtures)
+  const liveStats = computeTeamStatsFromFixtures(fixtures)
+  const goalStatsByTeam = computeTeamGoalStats(fixtures)
 
   return (data ?? []).map(team => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,7 +113,7 @@ export async function getAllTeamsWithProgress() {
 export async function getRankings() {
   const supabase = createAdminClient()
 
-  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, finishedFixtures] = await Promise.all([
+  const [{ data: players, error: pErr }, { data: playerTeams, error: ptErr }, fixtures] = await Promise.all([
     supabase
       .from('players')
       .select('id, name, access_token, is_guest')
@@ -192,14 +128,14 @@ export async function getRankings() {
           team_progress ( group_wins, group_draws, stage_reached, is_champion )
         )
       `),
-    fetchFinishedFixtureRows(),
+    fetchFixtureRows(),
   ])
 
   if (pErr || !players) throw pErr ?? new Error('Could not fetch players')
   if (ptErr) throw ptErr
 
-  const liveStats = computeTeamStatsFromFixtures(finishedFixtures)
-  const goalStatsByTeam = computeTeamGoalStats(finishedFixtures)
+  const liveStats = computeTeamStatsFromFixtures(fixtures)
+  const goalStatsByTeam = computeTeamGoalStats(fixtures)
 
   const ranked = players.map(player => {
     const myTeams = (playerTeams ?? []).filter(pt => pt.player_id === player.id)

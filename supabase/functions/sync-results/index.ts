@@ -24,6 +24,132 @@ const FD_WINNER_ADVANCES_TO: Record<string, string> = {
   FINAL: 'champion',
 }
 
+const WORLD_CUP_2026_GROUP_COUNT = 12
+const FIXTURES_PER_GROUP = 6
+
+type TeamStats = {
+  group_wins: number
+  group_draws: number
+  stage_reached: string
+  is_champion: boolean
+}
+
+type MatchRow = {
+  stage: string
+  status: string
+  group: string | null
+  homeTeam: { id: number | null } | null
+  awayTeam: { id: number | null } | null
+  score: {
+    winner: string | null
+    fullTime?: { home: number | null; away: number | null }
+  }
+}
+
+type GroupStanding = {
+  teamId: string
+  points: number
+  goalDifference: number
+  goalsFor: number
+}
+
+function compareStandings(a: GroupStanding, b: GroupStanding) {
+  return (
+    b.points - a.points ||
+    b.goalDifference - a.goalDifference ||
+    b.goalsFor - a.goalsFor
+  )
+}
+
+function applyGroupQualification(
+  teamStats: Map<string, TeamStats>,
+  matches: MatchRow[],
+  teamMap: Map<number, { id: string; pot: number }>,
+) {
+  const groupMatches = matches.filter(match => match.stage === 'GROUP_STAGE')
+  if (groupMatches.length === 0) return
+
+  if (
+    groupMatches.some(match => {
+      const homeScore = match.score?.fullTime?.home
+      const awayScore = match.score?.fullTime?.away
+      const homeApiId = match.homeTeam?.id
+      const awayApiId = match.awayTeam?.id
+      return (
+        match.status !== 'FINISHED' ||
+        homeScore == null ||
+        awayScore == null ||
+        !homeApiId ||
+        !awayApiId ||
+        !teamMap.has(homeApiId) ||
+        !teamMap.has(awayApiId)
+      )
+    })
+  ) {
+    return
+  }
+
+  const groups = Array.from(
+    new Set(groupMatches.map(match => match.group).filter((group): group is string => Boolean(group))),
+  )
+  if (groups.length < WORLD_CUP_2026_GROUP_COUNT) return
+  if (
+    groups.some(
+      group => groupMatches.filter(match => match.group === group).length < FIXTURES_PER_GROUP,
+    )
+  ) {
+    return
+  }
+
+  const qualified = new Set<string>()
+  const thirdPlaced: GroupStanding[] = []
+
+  for (const group of groups) {
+    const standings = new Map<string, GroupStanding>()
+    const ensure = (teamId: string) => {
+      if (!standings.has(teamId)) {
+        standings.set(teamId, { teamId, points: 0, goalDifference: 0, goalsFor: 0 })
+      }
+      return standings.get(teamId)!
+    }
+
+    for (const match of groupMatches.filter(candidate => candidate.group === group)) {
+      const homeDb = teamMap.get(match.homeTeam!.id!)
+      const awayDb = teamMap.get(match.awayTeam!.id!)
+      const homeScore = match.score.fullTime!.home!
+      const awayScore = match.score.fullTime!.away!
+      if (!homeDb || !awayDb) continue
+
+      const home = ensure(homeDb.id)
+      const away = ensure(awayDb.id)
+      home.goalsFor += homeScore
+      away.goalsFor += awayScore
+      home.goalDifference += homeScore - awayScore
+      away.goalDifference += awayScore - homeScore
+
+      if (homeScore > awayScore) home.points += 3
+      else if (awayScore > homeScore) away.points += 3
+      else {
+        home.points++
+        away.points++
+      }
+    }
+
+    const sorted = Array.from(standings.values()).sort(compareStandings)
+    for (const standing of sorted.slice(0, 2)) qualified.add(standing.teamId)
+    if (sorted[2]) thirdPlaced.push(sorted[2])
+  }
+
+  for (const standing of thirdPlaced.sort(compareStandings).slice(0, 8)) {
+    qualified.add(standing.teamId)
+  }
+
+  for (const teamId of qualified) {
+    const stats = teamStats.get(teamId)
+    if (stats?.stage_reached === 'group_stage') stats.stage_reached = 'r32'
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const incomingSecret = req.headers.get('x-sync-secret')
   if (incomingSecret !== SYNC_SECRET) {
@@ -49,13 +175,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const fdData = await fdRes.json()
-    const matches: Array<{
-      stage: string
-      status: string
-      homeTeam: { id: number }
-      awayTeam: { id: number }
-      score: { winner: string | null }
-    }> = fdData.matches ?? []
+    const matches: MatchRow[] = fdData.matches ?? []
 
     const finishedMatches = matches.filter(m => m.status === 'FINISHED')
     if (finishedMatches.length === 0) {
@@ -77,12 +197,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Initialise all teams at group_stage
-    const teamStats = new Map<string, {
-      group_wins: number
-      group_draws: number
-      stage_reached: string
-      is_champion: boolean
-    }>()
+    const teamStats = new Map<string, TeamStats>()
     for (const t of dbTeams) {
       teamStats.set(t.id, { group_wins: 0, group_draws: 0, stage_reached: 'group_stage', is_champion: false })
     }
@@ -128,6 +243,8 @@ Deno.serve(async (req: Request) => {
         }
       }
     }
+
+    applyGroupQualification(teamStats, matches, teamMap)
 
     const updates = Array.from(teamStats.entries()).map(([teamId, stats]) => ({
       team_id: teamId,
