@@ -23,6 +23,21 @@ const STAGE_SHORT: Record<string, string> = {
   champion: '🏆',
 }
 
+function hasCinderelaBonus(entry: RankingEntryWithDelta) {
+  return entry.teams.some(t => t.breakdown.cinderelaBonusTotal > 0)
+}
+
+function CinderelaSparkle({ className = '' }: { className?: string }) {
+  return (
+    <span
+      aria-label="Bónus Cinderela"
+      className={`shrink-0 text-gold ${className}`}
+    >
+      ✨
+    </span>
+  )
+}
+
 export function RankingTable({
   rankings,
   expandedId,
@@ -109,6 +124,7 @@ function PodiumCard({
   onToggle: (entry: RankingEntryWithDelta) => void
 }) {
   const pot1 = entry.teams.find(t => t.pot === 1)
+  const hasCinderela = hasCinderelaBonus(entry)
   const tuBadge = isCurrentPlayer && (
     <span className="rounded-md bg-gold px-1.5 py-0.5 text-[9px] font-extrabold tracking-[1px] text-night">
       TU
@@ -135,6 +151,7 @@ function PodiumCard({
         />
         <p className="flex max-w-full items-center gap-1.5 truncate text-sm font-bold text-foreground">
           {entry.player.name}
+          {hasCinderela && <CinderelaSparkle className="text-xs" />}
           {tuBadge}
         </p>
         <p className="text-xl font-extrabold tabular-nums text-gold">{entry.totalScore}</p>
@@ -160,6 +177,7 @@ function PodiumCard({
       />
       <p className="flex max-w-full items-center gap-1.5 truncate text-[13px] font-semibold text-foreground">
         {entry.player.name}
+        {hasCinderela && <CinderelaSparkle className="text-xs" />}
         {tuBadge}
       </p>
       <p className="text-base font-bold tabular-nums text-gold">{entry.totalScore}</p>
@@ -177,7 +195,10 @@ function TeamsDetail({ entry }: { entry: RankingEntryWithDelta }) {
         .map(t => (
           <div key={t.team.id} className="flex items-center gap-2 py-1 text-sm">
             <span className="text-base">{t.team.flag_emoji}</span>
-            <span className="flex-1 text-foreground">{t.team.name}</span>
+            <span className="flex flex-1 items-center gap-1.5 text-foreground">
+              <span className="truncate">{t.team.name}</span>
+              {t.breakdown.cinderelaBonusTotal > 0 && <CinderelaSparkle className="text-xs" />}
+            </span>
             <span className="text-xs text-muted-foreground">
               {STAGE_SHORT[t.progress.stage_reached] ?? t.progress.stage_reached}
             </span>
@@ -209,6 +230,8 @@ function RowHeader({
   entry: RankingEntryWithDelta
   isCurrentPlayer: boolean
 }) {
+  const hasCinderela = hasCinderelaBonus(entry)
+
   return (
     <>
       <span className="w-[18px] text-center text-[13px] text-muted-foreground tabular-nums">
@@ -220,6 +243,7 @@ function RowHeader({
         }`}
       >
         {entry.player.name}
+        {hasCinderela && <CinderelaSparkle className="text-xs" />}
         {isCurrentPlayer && (
           <span className="rounded-md bg-gold px-1.5 py-0.5 text-[9px] font-extrabold tracking-[1px] text-night">
             TU
