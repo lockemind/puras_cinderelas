@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isTeamEliminated } from '@/lib/elimination'
 import { getScoreBreakdown, mergeProgress } from '@/lib/scoring'
 import { compareRankingEntries, computeTeamGoalStats, sumGoalStats } from '@/lib/ranking'
 import { computeTeamStatsFromFixtures, type ProgressFixtureRow } from '@/lib/team-progress'
@@ -102,10 +103,17 @@ export async function getAllTeamsWithProgress() {
     const db = (team.team_progress as any) ?? {
       group_wins: 0, group_draws: 0, stage_reached: 'group_stage' as StageReached, is_champion: false, updated_at: '',
     }
+    const progress = {
+      team_id: team.id as string,
+      ...db,
+      ...mergeProgress(db, liveStats.get(team.id)),
+      updated_at: db.updated_at ?? '',
+    }
     return {
       ...team,
-      team_progress: { ...db, ...mergeProgress(db, liveStats.get(team.id)) },
+      team_progress: progress,
       goalStats: goalStatsByTeam.get(team.id) ?? { gamesPlayed: 0, goalsFor: 0, goalsAgainst: 0 },
+      eliminated: isTeamEliminated(team.id, progress, fixtures),
     }
   })
 }
@@ -160,6 +168,7 @@ export async function getRankings() {
         progress,
         breakdown,
         goalStats: teamGoalStats,
+        eliminated: isTeamEliminated(team.id, progress, fixtures),
       }
     })
 

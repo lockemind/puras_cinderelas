@@ -1,4 +1,4 @@
-import type { Fixture, TeamProgress } from './types'
+import type { TeamProgress } from './types'
 
 // football-data fixture stage → stage_reached value of the team that LOST at that stage
 // (mirrors FD_STAGE_MAP in supabase/functions/sync-results/index.ts)
@@ -20,7 +20,27 @@ type GroupStanding = {
   goalsFor: number
 }
 
-function hasScore(fixture: Fixture) {
+type EliminationFixture = {
+  stage: string
+  group: string | null
+  status: string
+  home_team?: { id: string } | null
+  away_team?: { id: string } | null
+  home_team_id?: string | null
+  away_team_id?: string | null
+  home_score: number | null
+  away_score: number | null
+}
+
+function homeTeamId(fixture: EliminationFixture) {
+  return fixture.home_team?.id ?? fixture.home_team_id ?? null
+}
+
+function awayTeamId(fixture: EliminationFixture) {
+  return fixture.away_team?.id ?? fixture.away_team_id ?? null
+}
+
+function hasScore(fixture: EliminationFixture) {
   return fixture.home_score != null && fixture.away_score != null
 }
 
@@ -32,7 +52,7 @@ function compareStandings(a: GroupStanding, b: GroupStanding) {
   )
 }
 
-function getGroupStandings(groupFixtures: Fixture[]) {
+function getGroupStandings(groupFixtures: EliminationFixture[]) {
   const standings = new Map<string, GroupStanding>()
 
   const ensure = (teamId: string) => {
@@ -49,8 +69,8 @@ function getGroupStandings(groupFixtures: Fixture[]) {
   }
 
   for (const fixture of groupFixtures) {
-    const homeId = fixture.home_team?.id
-    const awayId = fixture.away_team?.id
+    const homeId = homeTeamId(fixture)
+    const awayId = awayTeamId(fixture)
     if (!homeId || !awayId || fixture.status !== 'FINISHED' || !hasScore(fixture)) continue
 
     const home = ensure(homeId)
@@ -76,15 +96,15 @@ function getGroupStandings(groupFixtures: Fixture[]) {
   return Array.from(standings.values()).sort(compareStandings)
 }
 
-function isAllGroupStageFinished(fixtures: Fixture[]) {
+function isAllGroupStageFinished(fixtures: EliminationFixture[]) {
   return fixtures
     .filter(f => f.stage === 'GROUP_STAGE')
     .every(f => SETTLED.includes(f.status))
 }
 
-function isEliminatedFromGroup(teamId: string, fixtures: Fixture[]) {
+function isEliminatedFromGroup(teamId: string, fixtures: EliminationFixture[]) {
   const myGroup = fixtures.find(
-    f => f.stage === 'GROUP_STAGE' && (f.home_team?.id === teamId || f.away_team?.id === teamId)
+    f => f.stage === 'GROUP_STAGE' && (homeTeamId(f) === teamId || awayTeamId(f) === teamId)
   )?.group
   if (!myGroup) return false
 
@@ -121,12 +141,12 @@ function isEliminatedFromGroup(teamId: string, fixtures: Fixture[]) {
 export function isTeamEliminated(
   teamId: string,
   progress: TeamProgress,
-  fixtures: Fixture[]
+  fixtures: EliminationFixture[]
 ): boolean {
   if (progress.is_champion) return false
 
   const mine = fixtures.filter(
-    f => f.home_team?.id === teamId || f.away_team?.id === teamId
+    f => homeTeamId(f) === teamId || awayTeamId(f) === teamId
   )
   if (mine.some(f => !SETTLED.includes(f.status))) return false
 

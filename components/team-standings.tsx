@@ -41,15 +41,23 @@ export function TeamStandings({ teams }: { teams: Teams }) {
                     key={team.id}
                     className="flex items-center gap-3 px-3 py-2 rounded border border-night-border bg-night-card"
                   >
-                    <span className="text-base">{team.flag_emoji}</span>
-                    <span className="text-foreground text-sm flex-1 truncate">{team.name}</span>
-                    <span className="text-muted-foreground text-xs">
+                    <span className={`text-base ${team.eliminated ? 'opacity-60' : ''}`}>
+                      {team.flag_emoji}
+                    </span>
+                    <span
+                      className={`text-sm flex-1 truncate ${
+                        team.eliminated ? 'text-muted-foreground opacity-60' : 'text-foreground'
+                      }`}
+                    >
+                      {team.name}
+                    </span>
+                    <span className={`text-muted-foreground text-xs ${team.eliminated ? 'opacity-60' : ''}`}>
                       {STAGE_LABELS[progress.stage_reached] ?? progress.stage_reached}
                     </span>
-                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                    <span className={`text-[11px] tabular-nums text-muted-foreground ${team.eliminated ? 'opacity-60' : ''}`}>
                       {team.goalStats.gamesPlayed}({team.goalStats.goalsFor}/{team.goalStats.goalsAgainst})
                     </span>
-                    <span className="text-gold text-xs font-semibold tabular-nums">
+                    <span className="text-xs font-semibold tabular-nums text-gold">
                       {breakdown.total} pts
                     </span>
                   </div>
